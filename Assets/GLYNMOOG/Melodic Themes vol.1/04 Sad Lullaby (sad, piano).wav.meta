@@ -1,0 +1,30 @@
+fileFormatVersion: 2
+guid: 71df39c03295b4da9a34945a473f504e
+AudioImporter:
+  externalObjects: {}
+  serializedVersion: 7
+  defaultSettings:
+    serializedVersion: 2
+    loadType: 0
+    sampleRateSetting: 0
+    sampleRateOverride: 44100
+    compressionFormat: 1
+    quality: 1
+    conversionMode: 0
+    preloadAudioData: 0
+  platformSettingOverrides: {}
+  forceToMono: 0
+  normalize: 1
+  loadInBackground: 0
+  ambisonic: 0
+  3D: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288133
+  packageName: Melodic Themes vol.1
+  packageVersion: 1.0
+  assetPath: Assets/GLYNMOOG/Melodic Themes vol.1/04 Sad Lullaby (sad, piano).wav
+  uploadId: 672008

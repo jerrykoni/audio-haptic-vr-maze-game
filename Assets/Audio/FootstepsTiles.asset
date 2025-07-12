@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1233149941 &-6131384726356821115
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: PavementTiles_Mono_02_{-6131384726356821115}
+  m_AudioClip: {fileID: 8300000, guid: dbdad1c2d8b77324bba9b579cff98b8d, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &-3107722490188005242
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: PavementTiles_Mono_03_{-3107722490188005242}
+  m_AudioClip: {fileID: 8300000, guid: 8a5d0caffed7ad8408762173197c89eb, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &-2137587737550098629
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: PavementTiles_Mono_01_{-2137587737550098629}
+  m_AudioClip: {fileID: 8300000, guid: 8fc252ff972370241b2451ee8684b871, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &-803867693260759058
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: PavementTiles_Mono_05_{-803867693260759058}
+  m_AudioClip: {fileID: 8300000, guid: 68919eef930646c47baec2350ce2b51f, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1307931743 &6418180475301049370
+AudioRandomContainer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: FootstepsTiles
+  m_Volume: 0
+  m_Pitch: 0
+  m_AutomaticTriggerTime: 0
+  m_LoopCount: 1
+  m_VolumeRandomizationRange: {x: 0, y: 0}
+  m_PitchRandomizationRange: {x: -100, y: 100}
+  m_AutomaticTriggerTimeRandomizationRange: {x: 0, y: 0}
+  m_LoopCountRandomizationRange: {x: 0, y: 0}
+  m_Elements:
+  - {fileID: -2137587737550098629}
+  - {fileID: -6131384726356821115}
+  - {fileID: -3107722490188005242}
+  - {fileID: 7545876143597768557}
+  - {fileID: -803867693260759058}
+  m_AvoidRepeatingLast: 2
+  m_PlaybackMode: 2
+  m_TriggerMode: 0
+  m_AutomaticTriggerMode: 1
+  m_LoopMode: 2
+  m_VolumeRandomizationEnabled: 0
+  m_PitchRandomizationEnabled: 1
+  m_AutomaticTriggerTimeRandomizationEnabled: 0
+  m_LoopCountRandomizationEnabled: 0
+--- !u!1233149941 &7545876143597768557
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: PavementTiles_Mono_04_{7545876143597768557}
+  m_AudioClip: {fileID: 8300000, guid: e7132f9c36139aa4499ff5c5e80e8eaa, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
