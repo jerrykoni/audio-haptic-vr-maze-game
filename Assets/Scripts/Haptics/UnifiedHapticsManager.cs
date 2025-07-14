@@ -67,9 +67,6 @@ public class UnifiedHapticsManager : MonoBehaviour
 
     void OnObjectDetectedHaptics(GameObject detectedObject)
     {
-        // Play strong pulse for object detection
-        PlayScanPulse();
-
         // Start continuous scanning haptics
         if (!isScanning || currentScannedObject != detectedObject)
         {
@@ -80,7 +77,9 @@ public class UnifiedHapticsManager : MonoBehaviour
 
             isScanning = true;
             currentScannedObject = detectedObject;
-            scanStayHapticsCoroutine = StartCoroutine(ScanStayHaptics());
+            
+            // Start coroutine that handles both pulse and then stay haptics
+            scanStayHapticsCoroutine = StartCoroutine(ScanPulseAndStaySequence());
         }
     }
 
@@ -172,6 +171,18 @@ public class UnifiedHapticsManager : MonoBehaviour
         }
 
         scanStayHapticsCoroutine = null;
+    }
+
+    IEnumerator ScanPulseAndStaySequence()
+    {
+        // First play the scan pulse
+        PlayScanPulse();
+        
+        // Wait for the pulse to complete
+        yield return new WaitForSeconds(scanPulseDuration);
+        
+        // Then start the stay haptics
+        yield return StartCoroutine(ScanStayHaptics());
     }
 
     bool ShouldUseController(OVRInput.Controller controller)

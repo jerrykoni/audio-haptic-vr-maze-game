@@ -4457,7 +4457,7 @@ MonoBehaviour:
   scanController: 1
   scanPulseFrequency: 0.5
   scanPulseIntensity: 0.8
-  scanPulseDuration: 0.5
+  scanPulseDuration: 0.02
   scanStayFrequency: 0.2
   scanStayIntensity: 0.08
   scanStayPulseInterval: 0.3
@@ -27602,7 +27602,14 @@ MonoBehaviour:
   spatialAudioSource: {fileID: 2026364798}
   uiAudioSource: {fileID: 1018547535}
   hoverSound: {fileID: 8300000, guid: 1310bd00360df084e96ccc9a42f601b7, type: 3}
+  hoverSoundVolume: 1
+  hoverSoundPitch: 1
   hoverStaySound: {fileID: 8300000, guid: 034fcd2e5b7e9a2479625a10ec76491a, type: 3}
+  hoverStaySoundVolume: 1
+  hoverStaySoundPitch: 0.8
+  unhoverSound: {fileID: 8300000, guid: 0ae074243bcbf57468d433ad4f78acbb, type: 3}
+  unhoverSoundVolume: 1
+  unhoverSoundPitch: 1
   objectAudioMappings:
   - objectTag: Scannable
     audioClip: {fileID: 8300000, guid: 182e9378318a83d489866d0a25cd1164, type: 3}
