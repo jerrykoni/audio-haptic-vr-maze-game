@@ -105,17 +105,20 @@ public class UnifiedHapticsManager : MonoBehaviour
             {
                 OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.RTouch);
             }
+
+            // Start exit pulse sequence after clearing current haptics
+            StartCoroutine(PlayExitPulseAfterDelay());
         }
     }
 
     void PlayScanPulse()
     {
         // Play strong pulse on selected controllers
-        if (ShouldUseController(OVRInput.Controller.LTouch))
+        if (!leftWallHapticsActive && ShouldUseController(OVRInput.Controller.LTouch))
         {
             OVRInput.SetControllerVibration(scanPulseFrequency, scanPulseIntensity, OVRInput.Controller.LTouch);
         }
-        if (ShouldUseController(OVRInput.Controller.RTouch))
+        if (!rightWallHapticsActive && ShouldUseController(OVRInput.Controller.RTouch))
         {
             OVRInput.SetControllerVibration(scanPulseFrequency, scanPulseIntensity, OVRInput.Controller.RTouch);
         }
@@ -183,6 +186,13 @@ public class UnifiedHapticsManager : MonoBehaviour
         
         // Then start the stay haptics
         yield return StartCoroutine(ScanStayHaptics());
+    }
+
+    IEnumerator PlayExitPulseAfterDelay()
+    {
+        yield return new WaitForSeconds(0.021f);
+
+        PlayScanPulse();
     }
 
     bool ShouldUseController(OVRInput.Controller controller)
