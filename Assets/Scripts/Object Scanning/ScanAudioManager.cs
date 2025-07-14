@@ -13,7 +13,22 @@ public class ScanAudioManager : MonoBehaviour
 
     [Header("Predefined Audio Clips")]
     public AudioClip hoverSound;
+    [Range(0f, 1f)]
+    public float hoverSoundVolume = 1f;
+    [Range(0.1f, 3f)]
+    public float hoverSoundPitch = 1f;
+
     public AudioClip hoverStaySound;
+    [Range(0f, 1f)]
+    public float hoverStaySoundVolume = 1f;
+    [Range(0.1f, 3f)]
+    public float hoverStaySoundPitch = 1f;
+
+    public AudioClip unhoverSound;
+    [Range(0f, 1f)]
+    public float unhoverSoundVolume = 1f;
+    [Range(0.1f, 3f)]
+    public float unhoverSoundPitch = 1f;
 
     [Header("Object Audio Mapping")]
     public ObjectAudioMapping[] objectAudioMappings;
@@ -159,6 +174,9 @@ public class ScanAudioManager : MonoBehaviour
                 uiAudioSource.Stop();
             }
 
+            // Play unhover sound
+            PlayUnhoverSound(lostObject);
+
             OnObjectLostHaptics.Invoke(lostObject);
         }
     }
@@ -181,13 +199,49 @@ public class ScanAudioManager : MonoBehaviour
         {
             // Position UI audio source at object location
             uiAudioSource.transform.position = obj.transform.position;
+
+            // Apply volume and pitch settings
+            float originalVolume = uiAudioSource.volume;
+            float originalPitch = uiAudioSource.pitch;
+
+            uiAudioSource.volume = hoverSoundVolume;
+            uiAudioSource.pitch = hoverSoundPitch;
             uiAudioSource.PlayOneShot(hoverSound);
+
+            // Restore original settings
+            uiAudioSource.volume = originalVolume;
+            uiAudioSource.pitch = originalPitch;
+        }
+    }
+
+    void PlayUnhoverSound(GameObject obj)
+    {
+        if (unhoverSound != null)
+        {
+            // Position UI audio source at object location
+            uiAudioSource.transform.position = obj.transform.position;
+
+            // Apply volume and pitch settings
+            float originalVolume = uiAudioSource.volume;
+            float originalPitch = uiAudioSource.pitch;
+
+            uiAudioSource.volume = unhoverSoundVolume;
+            uiAudioSource.pitch = unhoverSoundPitch;
+            uiAudioSource.PlayOneShot(unhoverSound);
+
+            // Restore original settings
+            uiAudioSource.volume = originalVolume;
+            uiAudioSource.pitch = originalPitch;
         }
     }
 
     IEnumerator PlayHoverStaySound(GameObject obj)
     {
         if (hoverStaySound == null) yield break;
+
+        // Store original audio source settings
+        float originalVolume = uiAudioSource.volume;
+        float originalPitch = uiAudioSource.pitch;
 
         while (isObjectCurrentlyDetected && currentDetectedObject == obj)
         {
@@ -198,6 +252,8 @@ public class ScanAudioManager : MonoBehaviour
             if (!uiAudioSource.isPlaying || uiAudioSource.clip != hoverStaySound)
             {
                 uiAudioSource.clip = hoverStaySound;
+                uiAudioSource.volume = hoverStaySoundVolume;
+                uiAudioSource.pitch = hoverStaySoundPitch;
                 uiAudioSource.loop = true;
                 uiAudioSource.Play();
             }
@@ -211,6 +267,10 @@ public class ScanAudioManager : MonoBehaviour
         {
             uiAudioSource.Stop();
         }
+
+        // Restore original audio source settings
+        uiAudioSource.volume = originalVolume;
+        uiAudioSource.pitch = originalPitch;
     }
 
     IEnumerator PlayNewObjectAudioSequence(GameObject obj, string tag)
