@@ -1,4 +1,6 @@
-﻿using System;
+﻿// ConeScanner.cs
+
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,26 +18,25 @@ public class ConeScanner : MonoBehaviour
 
     [Header("Orientation")]
     [Tooltip("Rotation angles (X, Y, Z) to orient the cone from forward (Z) axis.")]
-    public Vector3 coneRotation = Vector3.zero;    // angles in degrees for continuous adjustment
+    public Vector3 coneRotation = Vector3.zero;
 
     [Header("Visuals")]
     public Material coneMaterial;
 
+    // --- MODIFIED: Added new event without changing existing ones ---
     // Fires when we gain a new closest object
     public event Action<GameObject> OnObjectDetected;
     // Fires when the cone stops overlapping the previously detected object
     public event Action<GameObject> OnObjectLost;
+    // Fires continuously with the current target and its distance
+    public event Action<GameObject, float> OnObjectUpdated;
 
-    // children
     private GameObject visualGO;
     private GameObject physGO;
 
-    // physics state
     private readonly HashSet<GameObject> candidates = new();
     private GameObject currentTarget;
     private float lastAngle, lastRange;
-
-    //Orientation offset
     private Quaternion axisOffset = Quaternion.identity;
 
     void Awake()
@@ -43,12 +44,9 @@ public class ConeScanner : MonoBehaviour
         if (cameraRig == null)
             Debug.LogError("OVRCameraRig not assigned!", this);
 
-        // Calculate axis offset from Euler angles for smooth rotation
         axisOffset = Quaternion.Euler(coneRotation);
-
         BuildVisualCone();
         BuildPhysicsCone();
-
         lastAngle = scanAngle;
         lastRange = scanRange;
     }
@@ -58,14 +56,10 @@ public class ConeScanner : MonoBehaviour
         var ctrl = GetController();
         if (ctrl == null) return;
 
-        // Recalculate axis offset from Euler angles for real-time adjustment
         axisOffset = Quaternion.Euler(coneRotation);
-
-        // smooth visuals
         visualGO.transform.SetPositionAndRotation(ctrl.position, ctrl.rotation * axisOffset);
 
-        if (!Mathf.Approximately(lastAngle, scanAngle) ||
-            !Mathf.Approximately(lastRange, scanRange))
+        if (!Mathf.Approximately(lastAngle, scanAngle) || !Mathf.Approximately(lastRange, scanRange))
         {
             ScaleCone(visualGO.transform);
         }
@@ -76,16 +70,17 @@ public class ConeScanner : MonoBehaviour
         var ctrl = GetController();
         if (ctrl == null) return;
 
-        // physics at fixed rate
         physGO.transform.SetPositionAndRotation(ctrl.position, ctrl.rotation * axisOffset);
 
-        if (!Mathf.Approximately(lastAngle, scanAngle) ||
-            !Mathf.Approximately(lastRange, scanRange))
+        if (!Mathf.Approximately(lastAngle, scanAngle) || !Mathf.Approximately(lastRange, scanRange))
         {
             ScaleCone(physGO.transform);
             lastAngle = scanAngle;
             lastRange = scanRange;
         }
+
+        // This is now called every fixed update to check for target changes and provide distance updates
+        UpdateBestTarget();
     }
 
     Transform GetController()
@@ -93,32 +88,19 @@ public class ConeScanner : MonoBehaviour
            ? cameraRig.rightHandAnchor
            : cameraRig.leftHandAnchor;
 
-    // Called via TriggerRelay on physGO
     public void HandleTriggerEnter(Collider other)
     {
         if (IsValid(other.gameObject))
         {
             candidates.Add(other.gameObject);
-            UpdateBestTarget();
         }
     }
 
     public void HandleTriggerExit(Collider other)
     {
-        var go = other.gameObject;
-
-        // if this was our current target, signal its loss
-        if (go == currentTarget)
-        {
-            OnObjectLost?.Invoke(currentTarget);
-            Debug.LogWarning($"Object lost: {currentTarget.name}");
-        }
-
-        // then remove it from candidates and recompute best
-        if (candidates.Remove(go))
-        {
-            UpdateBestTarget();
-        }
+        // When an object leaves the trigger, it's no longer a candidate.
+        // UpdateBestTarget in FixedUpdate will handle the logic of losing the target.
+        candidates.Remove(other.gameObject);
     }
 
     bool IsValid(GameObject go)
@@ -127,36 +109,56 @@ public class ConeScanner : MonoBehaviour
         return go.isStatic && (scannableLayer.value & bit) != 0;
     }
 
+    // --- MODIFIED: This function now also fires the new OnObjectUpdated event ---
     void UpdateBestTarget()
     {
         GameObject best = null;
-        float bestDist = float.MaxValue;
+        float bestDistSqr = float.MaxValue;
         Vector3 apex = physGO.transform.position;
+
+        candidates.RemoveWhere(go => go == null);
 
         foreach (var go in candidates)
         {
-            if (go == null) continue;
             var col = go.GetComponent<Collider>();
             if (col == null) continue;
 
             Vector3 pt = col.ClosestPoint(apex);
             float dSqr = (pt - apex).sqrMagnitude;
-            if (dSqr < bestDist)
+            if (dSqr < bestDistSqr)
             {
-                bestDist = dSqr;
+                bestDistSqr = dSqr;
                 best = go;
             }
         }
 
-        // if the best‐candidate changed, fire events
+        // This block handles the original OnObjectDetected and OnObjectLost events.
+        // It only fires when the target *changes*. This logic is preserved.
         if (best != currentTarget)
         {
+            if (currentTarget != null)
+            {
+                OnObjectLost?.Invoke(currentTarget);
+            }
+
             currentTarget = best;
-            OnObjectDetected?.Invoke(currentTarget);
-            Debug.LogWarning($"Object detected: {currentTarget?.name ?? "None"}");
+
+            if (currentTarget != null)
+            {
+                OnObjectDetected?.Invoke(currentTarget);
+            }
+        }
+
+        // This new block fires OnObjectUpdated every frame there IS a target,
+        // providing the continuous distance data needed for the haptics.
+        if (currentTarget != null)
+        {
+            OnObjectUpdated?.Invoke(currentTarget, Mathf.Sqrt(bestDistSqr));
         }
     }
 
+    // The rest of the script (BuildVisualCone, BuildPhysicsCone, etc.) remains the same.
+    #region Cone Generation
     void BuildVisualCone()
     {
         visualGO = new GameObject("ConeVisual");
@@ -191,7 +193,6 @@ public class ConeScanner : MonoBehaviour
         rb.isKinematic = true;
         rb.useGravity = false;
 
-        // attach relay so that triggers go back to us
         var relay = physGO.AddComponent<TriggerRelay>();
         relay.scanner = this;
 
@@ -231,4 +232,5 @@ public class ConeScanner : MonoBehaviour
         mesh.RecalculateNormals();
         return mesh;
     }
+    #endregion
 }
