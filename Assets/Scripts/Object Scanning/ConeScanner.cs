@@ -1,14 +1,12 @@
-﻿// ConeScanner.cs
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class ConeScanner : MonoBehaviour
 {
-    [Header("OVR Setup")]
-    public OVRCameraRig cameraRig;
-    public bool useRightHand = true;
+    [Header("Target")]
+    [Tooltip("The Transform that the cone will be attached to and follow.")]
+    public Transform attachPoint;
 
     [Header("Cone Settings")]
     [Range(1f, 89f)] public float scanAngle = 30f;
@@ -17,13 +15,12 @@ public class ConeScanner : MonoBehaviour
     public LayerMask scannableLayer;
 
     [Header("Orientation")]
-    [Tooltip("Rotation angles (X, Y, Z) to orient the cone from forward (Z) axis.")]
+    [Tooltip("Local rotation angles (X, Y, Z) to apply as an offset to the attachPoint's rotation.")]
     public Vector3 coneRotation = Vector3.zero;
 
     [Header("Visuals")]
     public Material coneMaterial;
 
-    // --- MODIFIED: Added new event without changing existing ones ---
     // Fires when we gain a new closest object
     public event Action<GameObject> OnObjectDetected;
     // Fires when the cone stops overlapping the previously detected object
@@ -41,8 +38,8 @@ public class ConeScanner : MonoBehaviour
 
     void Awake()
     {
-        if (cameraRig == null)
-            Debug.LogError("OVRCameraRig not assigned!", this);
+        if (attachPoint == null)
+            Debug.LogError("Attach Point Transform has not been assigned!", this);
 
         axisOffset = Quaternion.Euler(coneRotation);
         BuildVisualCone();
@@ -53,11 +50,10 @@ public class ConeScanner : MonoBehaviour
 
     void Update()
     {
-        var ctrl = GetController();
-        if (ctrl == null) return;
+        if (attachPoint == null) return;
 
         axisOffset = Quaternion.Euler(coneRotation);
-        visualGO.transform.SetPositionAndRotation(ctrl.position, ctrl.rotation * axisOffset);
+        visualGO.transform.SetPositionAndRotation(attachPoint.position, attachPoint.rotation * axisOffset);
 
         if (!Mathf.Approximately(lastAngle, scanAngle) || !Mathf.Approximately(lastRange, scanRange))
         {
@@ -67,10 +63,9 @@ public class ConeScanner : MonoBehaviour
 
     void FixedUpdate()
     {
-        var ctrl = GetController();
-        if (ctrl == null) return;
+        if (attachPoint == null) return;
 
-        physGO.transform.SetPositionAndRotation(ctrl.position, ctrl.rotation * axisOffset);
+        physGO.transform.SetPositionAndRotation(attachPoint.position, attachPoint.rotation * axisOffset);
 
         if (!Mathf.Approximately(lastAngle, scanAngle) || !Mathf.Approximately(lastRange, scanRange))
         {
@@ -82,11 +77,6 @@ public class ConeScanner : MonoBehaviour
         // This is now called every fixed update to check for target changes and provide distance updates
         UpdateBestTarget();
     }
-
-    Transform GetController()
-        => useRightHand
-           ? cameraRig.rightHandAnchor
-           : cameraRig.leftHandAnchor;
 
     public void HandleTriggerEnter(Collider other)
     {
@@ -109,7 +99,6 @@ public class ConeScanner : MonoBehaviour
         return go.isStatic && (scannableLayer.value & bit) != 0;
     }
 
-    // --- MODIFIED: This function now also fires the new OnObjectUpdated event ---
     void UpdateBestTarget()
     {
         GameObject best = null;
@@ -157,7 +146,6 @@ public class ConeScanner : MonoBehaviour
         }
     }
 
-    // The rest of the script (BuildVisualCone, BuildPhysicsCone, etc.) remains the same.
     #region Cone Generation
     void BuildVisualCone()
     {

@@ -6697,8 +6697,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78151d0245ff2a447a17887568b2f4cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraRig: {fileID: 42461283}
-  useRightHand: 1
+  attachPoint: {fileID: 1266988950}
   scanAngle: 5
   scanRange: 6
   resolution: 16
