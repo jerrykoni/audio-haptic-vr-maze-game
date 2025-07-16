@@ -10,6 +10,7 @@ public class ScanAudioManager : MonoBehaviour
     [Header("Audio Settings")]
     public AudioSource nameAudioSource;
     public AudioSource hoverAudioSource;
+    public AudioSource hoverStayAudioSource;
 
     [Header("Predefined Audio Clips")]
     public AudioClip hoverSound;
@@ -100,6 +101,22 @@ public class ScanAudioManager : MonoBehaviour
             hoverAudioSource = uiAudioObject.AddComponent<AudioSource>();
         }
 
+        if (hoverStayAudioSource == null)
+        {
+            Debug.LogWarning("Hover Stay Audio Source is not assigned.");
+        }
+
+        hoverStayAudioSource.loop = true;
+        hoverStayAudioSource.playOnAwake = false;
+        hoverStayAudioSource.spatialBlend = 1f;
+        hoverStayAudioSource.clip = hoverStaySound;
+
+        hoverAudioSource.loop = false;
+        hoverAudioSource.playOnAwake = false;
+
+        nameAudioSource.loop = false;
+        nameAudioSource.playOnAwake = false;
+
         // Initialize events
         if (OnTTSRequested == null) OnTTSRequested = new UnityEvent<string>();
         if (OnObjectScanned == null) OnObjectScanned = new UnityEvent<GameObject>();
@@ -156,10 +173,10 @@ public class ScanAudioManager : MonoBehaviour
                 hoverStayCoroutine = null;
             }
 
-            // Stop UI audio source if it's playing hover stay sound
-            if (hoverAudioSource.isPlaying && hoverAudioSource.clip == hoverStaySound)
+            // Stop hover audio source if it's playing hover stay sound
+            if (hoverStayAudioSource.isPlaying)
             {
-                hoverAudioSource.Stop();
+                hoverStayAudioSource.Stop();
             }
 
             // Play unhover sound
@@ -225,25 +242,23 @@ public class ScanAudioManager : MonoBehaviour
 
     IEnumerator PlayHoverStaySound(GameObject obj)
     {
-        if (hoverStaySound == null) yield break;
-
-        // Store original audio source settings
-        float originalVolume = hoverAudioSource.volume;
-        float originalPitch = hoverAudioSource.pitch;
+        if (hoverStaySound == null)
+        {
+            Debug.LogWarning("Hover Stay Sound is not assigned.");
+            yield break;
+        }
 
         while (isObjectCurrentlyDetected && currentDetectedObject == obj)
         {
             // Position UI audio source at object location
-            hoverAudioSource.transform.position = obj.transform.position;
+            hoverStayAudioSource.transform.position = obj.transform.position;
 
             // Play hover stay sound if not already playing
-            if (!hoverAudioSource.isPlaying || hoverAudioSource.clip != hoverStaySound)
+            if (!hoverStayAudioSource.isPlaying)
             {
-                hoverAudioSource.clip = hoverStaySound;
-                hoverAudioSource.volume = hoverStaySoundVolume;
-                hoverAudioSource.pitch = hoverStaySoundPitch;
-                hoverAudioSource.loop = true;
-                hoverAudioSource.Play();
+                //hoverStayAudioSource.volume = hoverStaySoundVolume;
+                hoverStayAudioSource.pitch = hoverStaySoundPitch;
+                hoverStayAudioSource.Play();
             }
 
             // Update position continuously
@@ -251,14 +266,10 @@ public class ScanAudioManager : MonoBehaviour
         }
 
         // Stop the sound when object is no longer detected
-        if (hoverAudioSource.isPlaying && hoverAudioSource.clip == hoverStaySound)
+        if (hoverStayAudioSource.isPlaying)
         {
-            hoverAudioSource.Stop();
+            hoverStayAudioSource.Stop();
         }
-
-        // Restore original audio source settings
-        hoverAudioSource.volume = originalVolume;
-        hoverAudioSource.pitch = originalPitch;
     }
 
     IEnumerator PlayNewObjectAudioSequence(GameObject obj, string tag)
