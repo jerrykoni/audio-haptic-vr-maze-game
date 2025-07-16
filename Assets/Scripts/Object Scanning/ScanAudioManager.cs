@@ -8,8 +8,8 @@ using UnityEngine.Events;
 public class ScanAudioManager : MonoBehaviour
 {
     [Header("Audio Settings")]
-    public AudioSource spatialAudioSource;
-    public AudioSource uiAudioSource; // For non-spatial feedback
+    public AudioSource nameAudioSource;
+    public AudioSource hoverAudioSource;
 
     [Header("Predefined Audio Clips")]
     public AudioClip hoverSound;
@@ -83,34 +83,34 @@ public class ScanAudioManager : MonoBehaviour
         }
 
         // Setup audio sources if not assigned
-        if (spatialAudioSource == null)
+        if (nameAudioSource == null)
         {
-            spatialAudioSource = GetComponent<AudioSource>();
-            if (spatialAudioSource == null)
+            nameAudioSource = GetComponent<AudioSource>();
+            if (nameAudioSource == null)
             {
-                spatialAudioSource = gameObject.AddComponent<AudioSource>();
+                nameAudioSource = gameObject.AddComponent<AudioSource>();
             }
         }
 
-        if (uiAudioSource == null)
+        if (hoverAudioSource == null)
         {
             // Create a separate audio source for UI sounds
             GameObject uiAudioObject = new GameObject("UI Audio Source");
             uiAudioObject.transform.SetParent(transform);
-            uiAudioSource = uiAudioObject.AddComponent<AudioSource>();
+            hoverAudioSource = uiAudioObject.AddComponent<AudioSource>();
         }
 
         // Configure spatial audio source
-        spatialAudioSource.spatialBlend = 1f; // Full 3D
-        spatialAudioSource.rolloffMode = AudioRolloffMode.Logarithmic;
-        spatialAudioSource.minDistance = 1f;
-        spatialAudioSource.maxDistance = 20f;
+        nameAudioSource.spatialBlend = 1f; // Full 3D
+        nameAudioSource.rolloffMode = AudioRolloffMode.Logarithmic;
+        nameAudioSource.minDistance = 1f;
+        nameAudioSource.maxDistance = 20f;
 
         // Configure UI audio source
-        uiAudioSource.spatialBlend = 1f; // Also 3D positioned
-        uiAudioSource.rolloffMode = AudioRolloffMode.Logarithmic;
-        uiAudioSource.minDistance = 0.5f;
-        uiAudioSource.maxDistance = 10f;
+        hoverAudioSource.spatialBlend = 1f; // Also 3D positioned
+        hoverAudioSource.rolloffMode = AudioRolloffMode.Logarithmic;
+        hoverAudioSource.minDistance = 0.5f;
+        hoverAudioSource.maxDistance = 10f;
 
         // Initialize events
         if (OnTTSRequested == null) OnTTSRequested = new UnityEvent<string>();
@@ -169,9 +169,9 @@ public class ScanAudioManager : MonoBehaviour
             }
 
             // Stop UI audio source if it's playing hover stay sound
-            if (uiAudioSource.isPlaying && uiAudioSource.clip == hoverStaySound)
+            if (hoverAudioSource.isPlaying && hoverAudioSource.clip == hoverStaySound)
             {
-                uiAudioSource.Stop();
+                hoverAudioSource.Stop();
             }
 
             // Play unhover sound
@@ -198,19 +198,19 @@ public class ScanAudioManager : MonoBehaviour
         if (hoverSound != null)
         {
             // Position UI audio source at object location
-            uiAudioSource.transform.position = obj.transform.position;
+            hoverAudioSource.transform.position = obj.transform.position;
 
             // Apply volume and pitch settings
-            float originalVolume = uiAudioSource.volume;
-            float originalPitch = uiAudioSource.pitch;
+            float originalVolume = hoverAudioSource.volume;
+            float originalPitch = hoverAudioSource.pitch;
 
-            uiAudioSource.volume = hoverSoundVolume;
-            uiAudioSource.pitch = hoverSoundPitch;
-            uiAudioSource.PlayOneShot(hoverSound);
+            hoverAudioSource.volume = hoverSoundVolume;
+            hoverAudioSource.pitch = hoverSoundPitch;
+            hoverAudioSource.PlayOneShot(hoverSound);
 
             // Restore original settings
-            uiAudioSource.volume = originalVolume;
-            uiAudioSource.pitch = originalPitch;
+            hoverAudioSource.volume = originalVolume;
+            hoverAudioSource.pitch = originalPitch;
         }
     }
 
@@ -219,19 +219,19 @@ public class ScanAudioManager : MonoBehaviour
         if (unhoverSound != null)
         {
             // Position UI audio source at object location
-            uiAudioSource.transform.position = obj.transform.position;
+            hoverAudioSource.transform.position = obj.transform.position;
 
             // Apply volume and pitch settings
-            float originalVolume = uiAudioSource.volume;
-            float originalPitch = uiAudioSource.pitch;
+            float originalVolume = hoverAudioSource.volume;
+            float originalPitch = hoverAudioSource.pitch;
 
-            uiAudioSource.volume = unhoverSoundVolume;
-            uiAudioSource.pitch = unhoverSoundPitch;
-            uiAudioSource.PlayOneShot(unhoverSound);
+            hoverAudioSource.volume = unhoverSoundVolume;
+            hoverAudioSource.pitch = unhoverSoundPitch;
+            hoverAudioSource.PlayOneShot(unhoverSound);
 
             // Restore original settings
-            uiAudioSource.volume = originalVolume;
-            uiAudioSource.pitch = originalPitch;
+            hoverAudioSource.volume = originalVolume;
+            hoverAudioSource.pitch = originalPitch;
         }
     }
 
@@ -240,22 +240,22 @@ public class ScanAudioManager : MonoBehaviour
         if (hoverStaySound == null) yield break;
 
         // Store original audio source settings
-        float originalVolume = uiAudioSource.volume;
-        float originalPitch = uiAudioSource.pitch;
+        float originalVolume = hoverAudioSource.volume;
+        float originalPitch = hoverAudioSource.pitch;
 
         while (isObjectCurrentlyDetected && currentDetectedObject == obj)
         {
             // Position UI audio source at object location
-            uiAudioSource.transform.position = obj.transform.position;
+            hoverAudioSource.transform.position = obj.transform.position;
 
             // Play hover stay sound if not already playing
-            if (!uiAudioSource.isPlaying || uiAudioSource.clip != hoverStaySound)
+            if (!hoverAudioSource.isPlaying || hoverAudioSource.clip != hoverStaySound)
             {
-                uiAudioSource.clip = hoverStaySound;
-                uiAudioSource.volume = hoverStaySoundVolume;
-                uiAudioSource.pitch = hoverStaySoundPitch;
-                uiAudioSource.loop = true;
-                uiAudioSource.Play();
+                hoverAudioSource.clip = hoverStaySound;
+                hoverAudioSource.volume = hoverStaySoundVolume;
+                hoverAudioSource.pitch = hoverStaySoundPitch;
+                hoverAudioSource.loop = true;
+                hoverAudioSource.Play();
             }
 
             // Update position continuously
@@ -263,14 +263,14 @@ public class ScanAudioManager : MonoBehaviour
         }
 
         // Stop the sound when object is no longer detected
-        if (uiAudioSource.isPlaying && uiAudioSource.clip == hoverStaySound)
+        if (hoverAudioSource.isPlaying && hoverAudioSource.clip == hoverStaySound)
         {
-            uiAudioSource.Stop();
+            hoverAudioSource.Stop();
         }
 
         // Restore original audio source settings
-        uiAudioSource.volume = originalVolume;
-        uiAudioSource.pitch = originalPitch;
+        hoverAudioSource.volume = originalVolume;
+        hoverAudioSource.pitch = originalPitch;
     }
 
     IEnumerator PlayNewObjectAudioSequence(GameObject obj, string tag)
@@ -289,14 +289,14 @@ public class ScanAudioManager : MonoBehaviour
         isPlayingNameAudio = true;
 
         // Position the spatial audio source at the object's location
-        spatialAudioSource.transform.position = obj.transform.position;
+        nameAudioSource.transform.position = obj.transform.position;
 
         // Try to play predefined audio clip
         if (audioClipMap.ContainsKey(tag) && audioClipMap[tag] != null)
         {
             AudioClip clip = audioClipMap[tag];
-            spatialAudioSource.clip = clip;
-            spatialAudioSource.Play();
+            nameAudioSource.clip = clip;
+            nameAudioSource.Play();
 
             // Wait for the clip to finish
             yield return new WaitForSeconds(clip.length);
@@ -319,14 +319,14 @@ public class ScanAudioManager : MonoBehaviour
 
     void PlayUISound(AudioClip clip, GameObject targetObject = null)
     {
-        if (clip != null && uiAudioSource != null)
+        if (clip != null && hoverAudioSource != null)
         {
             // Position at target object if provided
             if (targetObject != null)
             {
-                uiAudioSource.transform.position = targetObject.transform.position;
+                hoverAudioSource.transform.position = targetObject.transform.position;
             }
-            uiAudioSource.PlayOneShot(clip);
+            hoverAudioSource.PlayOneShot(clip);
         }
     }
 
@@ -373,8 +373,8 @@ public class ScanAudioManager : MonoBehaviour
     {
         if (audioClipMap.ContainsKey(tag) && audioClipMap[tag] != null)
         {
-            spatialAudioSource.transform.position = transform.position;
-            spatialAudioSource.PlayOneShot(audioClipMap[tag]);
+            nameAudioSource.transform.position = transform.position;
+            nameAudioSource.PlayOneShot(audioClipMap[tag]);
         }
         else
         {
