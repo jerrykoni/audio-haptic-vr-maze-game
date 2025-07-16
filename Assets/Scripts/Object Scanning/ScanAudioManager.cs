@@ -100,18 +100,6 @@ public class ScanAudioManager : MonoBehaviour
             hoverAudioSource = uiAudioObject.AddComponent<AudioSource>();
         }
 
-        // Configure spatial audio source
-        nameAudioSource.spatialBlend = 1f; // Full 3D
-        nameAudioSource.rolloffMode = AudioRolloffMode.Logarithmic;
-        nameAudioSource.minDistance = 1f;
-        nameAudioSource.maxDistance = 20f;
-
-        // Configure UI audio source
-        hoverAudioSource.spatialBlend = 1f; // Also 3D positioned
-        hoverAudioSource.rolloffMode = AudioRolloffMode.Logarithmic;
-        hoverAudioSource.minDistance = 0.5f;
-        hoverAudioSource.maxDistance = 10f;
-
         // Initialize events
         if (OnTTSRequested == null) OnTTSRequested = new UnityEvent<string>();
         if (OnObjectScanned == null) OnObjectScanned = new UnityEvent<GameObject>();
