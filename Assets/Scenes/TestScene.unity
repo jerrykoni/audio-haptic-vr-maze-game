@@ -4826,9 +4826,10 @@ MonoBehaviour:
   scanPulseDuration: 0.02
   scanStayFrequency: 0.2
   scanStayIntensity: 0.3
-  minScanStayPulseInterval: 0.04
+  minScanStayPulseInterval: 0.15
   maxScanStayPulseInterval: 0.74
   maxProximityDistance: 6
+  audioSourcePoolSize: 8
   audioManager: {fileID: 1861699308}
   coneScanner: {fileID: 859010868}
 --- !u!4 &611968543

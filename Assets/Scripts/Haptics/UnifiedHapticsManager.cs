@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic; // Required for List
 using System.Linq;
 using UnityEngine;
 
@@ -31,183 +32,209 @@ public class UnifiedHapticsManager : MonoBehaviour
     public float maxScanStayPulseInterval = 0.5f;
     public float maxProximityDistance = 1.0f;
 
+    // --- NEW: Audio Pooling Settings ---
+    [Header("Audio Settings")]
+    [Tooltip("Number of audio sources to pool for the hover sound to prevent clicking artifacts.")]
+    public int audioSourcePoolSize = 8;
+
     [Header("Component References")]
     public ScanAudioManager audioManager;
-    public ConeScanner coneScanner; // Reference to the scanner
+    public ConeScanner coneScanner;
 
-    // Internal state
-    private bool isScanning = false;
-    private GameObject currentScannedObject;
-    private Coroutine wallHapticsCoroutine;
-    private Coroutine scanStayHapticsCoroutine;
-    private float currentScanDistance = float.MaxValue; // Stores the distance from ConeScanner
+    // --- MODIFIED: Replaced single source with a pool ---
+    private List<AudioSource> _hoverAudioSourcePool;
+    private int _poolIndex = 0;
 
-    private bool leftWallHapticsActive = false;
-    private bool rightWallHapticsActive = false;
+    private Coroutine _wallHapticsCoroutine;
+    private Coroutine _scanHapticsCoroutine;
+
+    private GameObject _currentScannedObject;
+    private float _currentScanDistance = float.MaxValue;
+    private bool _leftWallHapticsActive = false;
+    private bool _rightWallHapticsActive = false;
 
     void Start()
     {
         if (audioManager == null) audioManager = FindFirstObjectByType<ScanAudioManager>();
         if (coneScanner == null) coneScanner = FindFirstObjectByType<ConeScanner>();
 
-        // --- MODIFIED: Connect to all three ConeScanner events ---
+        // --- REBUILT: Initialize the audio source pool ---
+        InitializeAudioPool();
+
         if (coneScanner != null)
         {
-            coneScanner.OnObjectDetected += OnObjectDetectedHaptics;
-            coneScanner.OnObjectLost += OnObjectLostHaptics;
-            coneScanner.OnObjectUpdated += OnObjectDistanceUpdate; // Subscribe to continuous updates
+            coneScanner.OnObjectDetected += HandleObjectDetected;
+            coneScanner.OnObjectLost += HandleObjectLost;
+            coneScanner.OnObjectUpdated += HandleObjectDistanceUpdate;
         }
         else
         {
             Debug.LogError("UnifiedHapticsManager requires a ConeScanner in the scene.", this);
         }
 
-        wallHapticsCoroutine = StartCoroutine(WallHapticFeedbackLoop());
+        _wallHapticsCoroutine = StartCoroutine(WallHapticFeedbackLoop());
     }
 
-    // This handler, for the original event, starts the haptic sequence
-    void OnObjectDetectedHaptics(GameObject detectedObject)
+    // --- NEW: Method to set up the pool of audio sources ---
+    void InitializeAudioPool()
     {
-        // The rest of your original logic is fine here
-        if (!isScanning || currentScannedObject != detectedObject)
+        _hoverAudioSourcePool = new List<AudioSource>();
+        GameObject poolParent = new GameObject("HoverAudioPool");
+        poolParent.transform.SetParent(this.transform);
+
+        for (int i = 0; i < audioSourcePoolSize; i++)
         {
-            if (scanStayHapticsCoroutine != null) StopCoroutine(scanStayHapticsCoroutine);
+            GameObject sourceGO = new GameObject($"PooledAudioSource_{i}");
+            sourceGO.transform.SetParent(poolParent.transform);
+            AudioSource source = sourceGO.AddComponent<AudioSource>();
 
-            isScanning = true;
-            currentScannedObject = detectedObject;
+            source.playOnAwake = false;
+            source.loop = false;
+            source.spatialBlend = 1.0f; // 3D Sound
 
-            scanStayHapticsCoroutine = StartCoroutine(ScanPulseAndStaySequence());
-        }
-    }
-
-    // --- NEW: This method receives the continuous distance updates from the new event ---
-    void OnObjectDistanceUpdate(GameObject target, float distance)
-    {
-        // We only care about the distance of the object we are currently locked onto
-        if (isScanning && target == currentScannedObject)
-        {
-            currentScanDistance = distance;
-        }
-    }
-
-    // This handler, for the original event, stops the haptic sequence
-    void OnObjectLostHaptics(GameObject lostObject)
-    {
-        if (currentScannedObject == lostObject)
-        {
-            isScanning = false;
-            currentScannedObject = null;
-            currentScanDistance = float.MaxValue; // Reset distance
-
-            if (scanStayHapticsCoroutine != null)
+            if (audioManager != null && audioManager.hoverStaySound != null)
             {
-                StopCoroutine(scanStayHapticsCoroutine);
-                scanStayHapticsCoroutine = null;
-            }
-
-            if (!leftWallHapticsActive && ShouldUseController(OVRInput.Controller.LTouch))
-            {
-                OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.LTouch);
-            }
-            if (!rightWallHapticsActive && ShouldUseController(OVRInput.Controller.RTouch))
-            {
-                OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.RTouch);
-            }
-            StartCoroutine(PlayExitPulseAfterDelay());
-        }
-    }
-
-    // --- MODIFIED: This coroutine now uses the distance provided by the event system ---
-    IEnumerator ScanStayHaptics()
-    {
-        var source = audioManager != null ? audioManager.hoverStayAudioSource : null;
-        var clip = audioManager != null ? audioManager.hoverStaySound : null;
-        source.transform.position = currentScannedObject.transform.position;
-
-        while (isScanning && currentScannedObject != null)
-        {
-            // Play brief pulse
-            if (!leftWallHapticsActive && ShouldUseController(OVRInput.Controller.LTouch))
-                OVRInput.SetControllerVibration(scanStayFrequency, scanStayIntensity, OVRInput.Controller.LTouch);
-            if (!rightWallHapticsActive && ShouldUseController(OVRInput.Controller.RTouch))
-                OVRInput.SetControllerVibration(scanStayFrequency, scanStayIntensity, OVRInput.Controller.RTouch);
-
-            if (source != null && clip != null)
-            {
+                source.clip = audioManager.hoverStaySound;
                 source.volume = audioManager.hoverStaySoundVolume;
                 source.pitch = audioManager.hoverStaySoundPitch;
-                source.PlayOneShot(clip);
             }
+            _hoverAudioSourcePool.Add(source);
+        }
+    }
 
-            yield return new WaitForSeconds(0.05f); // Short pulse duration
 
-            // Stop pulse
-            if (!leftWallHapticsActive && ShouldUseController(OVRInput.Controller.LTouch))
-                OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.LTouch);
-            if (!rightWallHapticsActive && ShouldUseController(OVRInput.Controller.RTouch))
-                OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.RTouch);
+    void OnDestroy()
+    {
+        if (coneScanner != null)
+        {
+            coneScanner.OnObjectDetected -= HandleObjectDetected;
+            coneScanner.OnObjectLost -= HandleObjectLost;
+            coneScanner.OnObjectUpdated -= HandleObjectDistanceUpdate;
+        }
+        StopAllCoroutines();
+        StopAllVibrations();
+    }
 
-            // Calculate wait time based on distance provided by ConeScanner
-            float t = Mathf.Clamp01(currentScanDistance / maxProximityDistance);
+
+    private void HandleObjectDetected(GameObject detectedObject)
+    {
+        if (_currentScannedObject == detectedObject) return;
+        StopScanningHapticsAndAudio();
+        _currentScannedObject = detectedObject;
+        _scanHapticsCoroutine = StartCoroutine(ScanSequence());
+    }
+
+    private void HandleObjectLost(GameObject lostObject)
+    {
+        if (_currentScannedObject == lostObject)
+        {
+            StopScanningHapticsAndAudio();
+            _currentScannedObject = null;
+            _currentScanDistance = float.MaxValue;
+            PlayPulse(scanPulseFrequency, scanPulseIntensity, scanPulseDuration);
+        }
+    }
+
+    private void HandleObjectDistanceUpdate(GameObject target, float distance)
+    {
+        if (target == _currentScannedObject)
+        {
+            _currentScanDistance = distance;
+        }
+    }
+
+    private void StopScanningHapticsAndAudio()
+    {
+        if (_scanHapticsCoroutine != null)
+        {
+            StopCoroutine(_scanHapticsCoroutine);
+            _scanHapticsCoroutine = null;
+        }
+
+        // --- MODIFIED: Stop all sources in the pool ---
+        // This is only needed for an abrupt, total stop (like losing the object).
+        if (_hoverAudioSourcePool != null)
+        {
+            foreach (var source in _hoverAudioSourcePool)
+            {
+                source.Stop();
+            }
+        }
+
+        if (!_leftWallHapticsActive && ShouldUseController(OVRInput.Controller.LTouch))
+            OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.LTouch);
+
+        if (!_rightWallHapticsActive && ShouldUseController(OVRInput.Controller.RTouch))
+            OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.RTouch);
+    }
+
+    // --- MODIFIED: ScanSequence now calls the new pooling method ---
+    private IEnumerator ScanSequence()
+    {
+        PlayPulse(scanPulseFrequency, scanPulseIntensity, scanPulseDuration);
+        //if (audioManager != null) audioManager.PlayScanPulseSound();
+
+        yield return new WaitForSeconds(scanPulseDuration);
+
+        while (_currentScannedObject != null)
+        {
+            PlayPulse(scanStayFrequency, scanStayIntensity, 0.05f);
+
+            // --- REPLACED FADE LOGIC WITH POOLING LOGIC ---
+            PlayPooledHoverSound();
+
+            float t = Mathf.Clamp01(_currentScanDistance / maxProximityDistance);
             float currentInterval = Mathf.Lerp(minScanStayPulseInterval, maxScanStayPulseInterval, t);
 
             yield return new WaitForSeconds(currentInterval);
         }
-
-        scanStayHapticsCoroutine = null;
     }
 
-    void OnDestroy()
+    // --- NEW: Method to play sound from the audio pool ---
+    private void PlayPooledHoverSound()
     {
-        // --- MODIFIED: Clean up all event listeners ---
-        if (coneScanner != null)
-        {
-            coneScanner.OnObjectDetected -= OnObjectDetectedHaptics;
-            coneScanner.OnObjectLost -= OnObjectLostHaptics;
-            coneScanner.OnObjectUpdated -= OnObjectDistanceUpdate;
-        }
+        // Basic checks to ensure everything is set up
+        if (_hoverAudioSourcePool == null || _hoverAudioSourcePool.Count == 0 || _currentScannedObject == null)
+            return;
 
-        // Stop all haptics
+        // Get the next available audio source from the pool
+        AudioSource sourceToPlay = _hoverAudioSourcePool[_poolIndex];
+
+        // Position it and play it. No stopping, no fading.
+        sourceToPlay.transform.position = _currentScannedObject.transform.position;
+        sourceToPlay.Play();
+
+        // Move to the next source for the next time, wrapping around if necessary
+        _poolIndex = (_poolIndex + 1) % _hoverAudioSourcePool.Count;
+    }
+
+
+    // --- UNCHANGED METHODS ---
+
+    #region Unchanged Methods
+    private void PlayPulse(float frequency, float intensity, float duration)
+    {
+        if (!_leftWallHapticsActive && ShouldUseController(OVRInput.Controller.LTouch))
+            StartCoroutine(VibrationCoroutine(OVRInput.Controller.LTouch, frequency, intensity, duration));
+        if (!_rightWallHapticsActive && ShouldUseController(OVRInput.Controller.RTouch))
+            StartCoroutine(VibrationCoroutine(OVRInput.Controller.RTouch, frequency, intensity, duration));
+    }
+
+    private IEnumerator VibrationCoroutine(OVRInput.Controller controller, float frequency, float intensity, float duration)
+    {
+        OVRInput.SetControllerVibration(frequency, intensity, controller);
+        yield return new WaitForSeconds(duration);
+        if ((controller == OVRInput.Controller.LTouch && !_leftWallHapticsActive) ||
+            (controller == OVRInput.Controller.RTouch && !_rightWallHapticsActive))
+        {
+            OVRInput.SetControllerVibration(0, 0, controller);
+        }
+    }
+
+    private void StopAllVibrations()
+    {
         OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.LTouch);
         OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.RTouch);
-
-        // Stop coroutines
-        if (wallHapticsCoroutine != null) StopCoroutine(wallHapticsCoroutine);
-        if (scanStayHapticsCoroutine != null) StopCoroutine(scanStayHapticsCoroutine);
-    }
-
-    // The rest of your script (PlayScanPulse, WallHapticFeedbackLoop, etc.)
-    // does not need to be changed.
-    #region Unchanged Methods
-    void PlayScanPulse()
-    {
-        if (!leftWallHapticsActive && ShouldUseController(OVRInput.Controller.LTouch))
-            OVRInput.SetControllerVibration(scanPulseFrequency, scanPulseIntensity, OVRInput.Controller.LTouch);
-        if (!rightWallHapticsActive && ShouldUseController(OVRInput.Controller.RTouch))
-            OVRInput.SetControllerVibration(scanPulseFrequency, scanPulseIntensity, OVRInput.Controller.RTouch);
-        StartCoroutine(StopPulseAfterDelay(scanPulseDuration));
-    }
-
-    IEnumerator StopPulseAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        if (!leftWallHapticsActive && ShouldUseController(OVRInput.Controller.LTouch))
-            OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.LTouch);
-        if (!rightWallHapticsActive && ShouldUseController(OVRInput.Controller.RTouch))
-            OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.RTouch);
-    }
-
-    IEnumerator ScanPulseAndStaySequence()
-    {
-        PlayScanPulse();
-        yield return new WaitForSeconds(scanPulseDuration);
-        yield return StartCoroutine(ScanStayHaptics());
-    }
-
-    IEnumerator PlayExitPulseAfterDelay()
-    {
-        yield return new WaitForSeconds(0.021f);
-        PlayScanPulse();
     }
 
     bool ShouldUseController(OVRInput.Controller controller)
@@ -226,8 +253,8 @@ public class UnifiedHapticsManager : MonoBehaviour
         WaitForSeconds wait = new WaitForSeconds(hapticCheckInterval);
         while (true)
         {
-            leftWallHapticsActive = ProcessHandHaptics(leftHandAnchor, OVRInput.Controller.LTouch);
-            rightWallHapticsActive = ProcessHandHaptics(rightHandAnchor, OVRInput.Controller.RTouch);
+            _leftWallHapticsActive = ProcessHandHaptics(leftHandAnchor, OVRInput.Controller.LTouch);
+            _rightWallHapticsActive = ProcessHandHaptics(rightHandAnchor, OVRInput.Controller.RTouch);
             yield return wait;
         }
     }
@@ -251,7 +278,7 @@ public class UnifiedHapticsManager : MonoBehaviour
             OVRInput.SetControllerVibration(wallHapticFrequency, intensity, controller);
             return true;
         }
-        else if (!isScanning || !ShouldUseController(controller))
+        else if (_currentScannedObject == null || !ShouldUseController(controller))
         {
             OVRInput.SetControllerVibration(0, 0, controller);
         }
