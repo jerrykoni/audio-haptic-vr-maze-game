@@ -49,7 +49,7 @@ public class ScanAudioManager : MonoBehaviour
     private string lastScannedTag;
     private float lastScanTime;
     private Coroutine currentAudioSequence;
-    private Coroutine hoverStayCoroutine;
+    //private Coroutine hoverStayCoroutine;
     private bool isPlayingNameAudio;
     private bool isObjectCurrentlyDetected;
 
@@ -106,7 +106,7 @@ public class ScanAudioManager : MonoBehaviour
             Debug.LogWarning("Hover Stay Audio Source is not assigned.");
         }
 
-        hoverStayAudioSource.loop = true;
+        hoverStayAudioSource.loop = false;
         hoverStayAudioSource.playOnAwake = false;
         hoverStayAudioSource.spatialBlend = 1f;
         hoverStayAudioSource.clip = hoverStaySound;
@@ -146,10 +146,10 @@ public class ScanAudioManager : MonoBehaviour
         }
 
         // Start or continue hover stay sound
-        if (hoverStayCoroutine == null)
-        {
-            hoverStayCoroutine = StartCoroutine(PlayHoverStaySound(detectedObject));
-        }
+        //if (hoverStayCoroutine == null)
+        //{
+        //    hoverStayCoroutine = StartCoroutine(PlayHoverStaySound(detectedObject));
+        //}
 
         lastScannedObject = detectedObject;
         lastScannedTag = objectTag;
@@ -166,18 +166,18 @@ public class ScanAudioManager : MonoBehaviour
             isObjectCurrentlyDetected = false;
             currentDetectedObject = null;
 
-            // Stop hover stay sound
-            if (hoverStayCoroutine != null)
-            {
-                StopCoroutine(hoverStayCoroutine);
-                hoverStayCoroutine = null;
-            }
+            //// Stop hover stay sound
+            //if (hoverStayCoroutine != null)
+            //{
+            //    StopCoroutine(hoverStayCoroutine);
+            //    hoverStayCoroutine = null;
+            //}
 
-            // Stop hover audio source if it's playing hover stay sound
-            if (hoverStayAudioSource.isPlaying)
-            {
-                hoverStayAudioSource.Stop();
-            }
+            //// Stop hover audio source if it's playing hover stay sound
+            //if (hoverStayAudioSource.isPlaying)
+            //{
+            //    hoverStayAudioSource.Stop();
+            //}
 
             // Play unhover sound
             PlayUnhoverSound(lostObject);
@@ -388,9 +388,9 @@ public class ScanAudioManager : MonoBehaviour
             StopCoroutine(currentAudioSequence);
         }
 
-        if (hoverStayCoroutine != null)
-        {
-            StopCoroutine(hoverStayCoroutine);
-        }
+        //if (hoverStayCoroutine != null)
+        //{
+        //    StopCoroutine(hoverStayCoroutine);
+        //}
     }
 }

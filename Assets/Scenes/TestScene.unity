@@ -28127,7 +28127,7 @@ MonoBehaviour:
   hoverSoundPitch: 1
   hoverStaySound: {fileID: 8300000, guid: 4393389c4e9969940bfda2dc7f786204, type: 3}
   hoverStaySoundVolume: 1
-  hoverStaySoundPitch: 0.6
+  hoverStaySoundPitch: 1
   unhoverSound: {fileID: 8300000, guid: 0ae074243bcbf57468d433ad4f78acbb, type: 3}
   unhoverSoundVolume: 1
   unhoverSoundPitch: 1
@@ -39611,7 +39611,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enableSpatialization: 1
-  gainBoostDb: 0
+  gainBoostDb: 12
   enableAcoustics: 0
   reverbSendDb: 0
 --- !u!82 &2078061170
@@ -39624,21 +39624,21 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: 4393389c4e9969940bfda2dc7f786204, type: 3}
+  m_Resource: {fileID: 8300000, guid: 4393389c4e9969940bfda2dc7f786204, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 50
+  MaxDistance: 9
   Pan2D: 0
-  rolloffMode: 0
+  rolloffMode: 1
   BypassEffects: 0
   BypassListenerEffects: 0
   BypassReverbZones: 0

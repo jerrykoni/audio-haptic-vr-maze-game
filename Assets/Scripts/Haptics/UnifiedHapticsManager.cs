@@ -120,6 +120,10 @@ public class UnifiedHapticsManager : MonoBehaviour
     // --- MODIFIED: This coroutine now uses the distance provided by the event system ---
     IEnumerator ScanStayHaptics()
     {
+        var source = audioManager != null ? audioManager.hoverStayAudioSource : null;
+        var clip = audioManager != null ? audioManager.hoverStaySound : null;
+        source.transform.position = currentScannedObject.transform.position;
+
         while (isScanning && currentScannedObject != null)
         {
             // Play brief pulse
@@ -127,6 +131,13 @@ public class UnifiedHapticsManager : MonoBehaviour
                 OVRInput.SetControllerVibration(scanStayFrequency, scanStayIntensity, OVRInput.Controller.LTouch);
             if (!rightWallHapticsActive && ShouldUseController(OVRInput.Controller.RTouch))
                 OVRInput.SetControllerVibration(scanStayFrequency, scanStayIntensity, OVRInput.Controller.RTouch);
+
+            if (source != null && clip != null)
+            {
+                source.volume = audioManager.hoverStaySoundVolume;
+                source.pitch = audioManager.hoverStaySoundPitch;
+                source.PlayOneShot(clip);
+            }
 
             yield return new WaitForSeconds(0.05f); // Short pulse duration
 
