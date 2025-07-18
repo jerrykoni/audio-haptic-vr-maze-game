@@ -13,7 +13,10 @@ public class ConeScanner : MonoBehaviour
     public float scanRange = 10f;
     [Range(3, 64)] public int resolution = 16;
     public LayerMask scannableLayer;
-    public LayerMask obstacleLayer;
+
+    [Header("Obstacles")]
+    [Tooltip("Which layers should block the scan beam?")]
+    public LayerMask obstacleMask;
 
     [Header("Orientation")]
     [Tooltip("Local rotation angles (X, Y, Z) to apply as an offset to the attachPoint's rotation.")]
@@ -53,29 +56,27 @@ public class ConeScanner : MonoBehaviour
     {
         if (attachPoint == null) return;
 
-        axisOffset = Quaternion.Euler(coneRotation);
-        visualGO.transform.SetPositionAndRotation(attachPoint.position, attachPoint.rotation * axisOffset);
+        visualGO.transform.SetPositionAndRotation(
+            attachPoint.position,
+            attachPoint.rotation * axisOffset);
 
-        if (!Mathf.Approximately(lastAngle, scanAngle) || !Mathf.Approximately(lastRange, scanRange))
-        {
-            ScaleCone(visualGO.transform);
-        }
+        // shrink/extend to hit‐point or max
+        float effRange = GetEffectiveRange();
+        ScaleCone(visualGO.transform, effRange);
     }
 
     void FixedUpdate()
     {
         if (attachPoint == null) return;
 
-        physGO.transform.SetPositionAndRotation(attachPoint.position, attachPoint.rotation * axisOffset);
+        physGO.transform.SetPositionAndRotation(
+            attachPoint.position,
+            attachPoint.rotation * axisOffset);
 
-        if (!Mathf.Approximately(lastAngle, scanAngle) || !Mathf.Approximately(lastRange, scanRange))
-        {
-            ScaleCone(physGO.transform);
-            lastAngle = scanAngle;
-            lastRange = scanRange;
-        }
+        float effRange = GetEffectiveRange();
+        ScaleCone(physGO.transform, effRange);
 
-        // This is now called every fixed update to check for target changes and provide distance updates
+        // now run your scanning logic as before…
         UpdateBestTarget();
     }
 
@@ -114,20 +115,7 @@ public class ConeScanner : MonoBehaviour
             if (col == null) continue;
 
             Vector3 pt = col.ClosestPoint(apex);
-            Vector3 directionToTarget = pt - apex;
-            float dSqr = directionToTarget.sqrMagnitude;
-
-            // Line-of-sight check
-            if (Physics.Raycast(apex, directionToTarget.normalized, out RaycastHit hit, scanRange, obstacleLayer))
-            {
-                // If the raycast hits something on the obstacle layer before it hits our target,
-                // then the target is blocked. We can check this by comparing the squared distances.
-                if (hit.distance * hit.distance < dSqr)
-                {
-                    continue; // This target is blocked, so skip to the next one.
-                }
-            }
-
+            float dSqr = (pt - apex).sqrMagnitude;
             if (dSqr < bestDistSqr)
             {
                 bestDistSqr = dSqr;
@@ -135,8 +123,8 @@ public class ConeScanner : MonoBehaviour
             }
         }
 
-        // --- The rest of the method remains the same ---
-
+        // This block handles the original OnObjectDetected and OnObjectLost events.
+        // It only fires when the target *changes*. This logic is preserved.
         if (best != currentTarget)
         {
             if (currentTarget != null)
@@ -152,11 +140,27 @@ public class ConeScanner : MonoBehaviour
             }
         }
 
+        // This new block fires OnObjectUpdated every frame there IS a target,
+        // providing the continuous distance data needed for the haptics.
         if (currentTarget != null)
         {
             OnObjectUpdated?.Invoke(currentTarget, Mathf.Sqrt(bestDistSqr));
         }
     }
+
+    float GetEffectiveRange()
+    {
+        // origin & direction in world‐space
+        Vector3 origin = attachPoint.position;
+        Vector3 forwardWS = attachPoint.rotation * axisOffset * Vector3.up;
+
+        // default to full range
+        float maxR = scanRange;
+        if (Physics.Raycast(origin, forwardWS, out var hit, scanRange, obstacleMask))
+            maxR = hit.distance;
+        return maxR;
+    }
+
 
     #region Cone Generation
     void BuildVisualCone()
@@ -174,7 +178,7 @@ public class ConeScanner : MonoBehaviour
                 color = new Color(1, 1, 1, 0.15f)
             };
 
-        ScaleCone(visualGO.transform);
+        ScaleCone(visualGO.transform, GetEffectiveRange());
     }
 
     void BuildPhysicsCone()
@@ -196,13 +200,14 @@ public class ConeScanner : MonoBehaviour
         var relay = physGO.AddComponent<TriggerRelay>();
         relay.scanner = this;
 
-        ScaleCone(physGO.transform);
+        ScaleCone(physGO.transform, GetEffectiveRange());
     }
 
-    void ScaleCone(Transform t)
+    void ScaleCone(Transform t, float range)
     {
-        float radius = Mathf.Tan(scanAngle * Mathf.Deg2Rad) * scanRange;
-        t.localScale = new Vector3(radius, scanRange, radius);
+        float radius = Mathf.Tan(scanAngle * Mathf.Deg2Rad) * range;
+        // Y‐axis of your unit cone is its length
+        t.localScale = new Vector3(radius, range, radius);
     }
 
     Mesh BuildUnitConeMesh()
