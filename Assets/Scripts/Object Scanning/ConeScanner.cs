@@ -13,6 +13,7 @@ public class ConeScanner : MonoBehaviour
     public float scanRange = 10f;
     [Range(3, 64)] public int resolution = 16;
     public LayerMask scannableLayer;
+    public LayerMask obstacleLayer;
 
     [Header("Orientation")]
     [Tooltip("Local rotation angles (X, Y, Z) to apply as an offset to the attachPoint's rotation.")]
@@ -113,7 +114,20 @@ public class ConeScanner : MonoBehaviour
             if (col == null) continue;
 
             Vector3 pt = col.ClosestPoint(apex);
-            float dSqr = (pt - apex).sqrMagnitude;
+            Vector3 directionToTarget = pt - apex;
+            float dSqr = directionToTarget.sqrMagnitude;
+
+            // Line-of-sight check
+            if (Physics.Raycast(apex, directionToTarget.normalized, out RaycastHit hit, scanRange, obstacleLayer))
+            {
+                // If the raycast hits something on the obstacle layer before it hits our target,
+                // then the target is blocked. We can check this by comparing the squared distances.
+                if (hit.distance * hit.distance < dSqr)
+                {
+                    continue; // This target is blocked, so skip to the next one.
+                }
+            }
+
             if (dSqr < bestDistSqr)
             {
                 bestDistSqr = dSqr;
@@ -121,8 +135,8 @@ public class ConeScanner : MonoBehaviour
             }
         }
 
-        // This block handles the original OnObjectDetected and OnObjectLost events.
-        // It only fires when the target *changes*. This logic is preserved.
+        // --- The rest of the method remains the same ---
+
         if (best != currentTarget)
         {
             if (currentTarget != null)
@@ -138,8 +152,6 @@ public class ConeScanner : MonoBehaviour
             }
         }
 
-        // This new block fires OnObjectUpdated every frame there IS a target,
-        // providing the continuous distance data needed for the haptics.
         if (currentTarget != null)
         {
             OnObjectUpdated?.Invoke(currentTarget, Mathf.Sqrt(bestDistSqr));

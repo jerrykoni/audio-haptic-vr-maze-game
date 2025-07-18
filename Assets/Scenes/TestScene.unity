@@ -6705,6 +6705,9 @@ MonoBehaviour:
   scannableLayer:
     serializedVersion: 2
     m_Bits: 256
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 128
   coneRotation: {x: 45, y: 0, z: 0}
   coneMaterial: {fileID: 2100000, guid: c9b1a79b9d91f3a4aa911aa115555c68, type: 2}
 --- !u!4 &859010869
