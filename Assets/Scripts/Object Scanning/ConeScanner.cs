@@ -150,17 +150,44 @@ public class ConeScanner : MonoBehaviour
 
     float GetEffectiveRange()
     {
-        // origin & direction in world‐space
+        // world‐space data
+        Vector3 forwardWS = (attachPoint.rotation * axisOffset * Vector3.up).normalized;
         Vector3 origin = attachPoint.position;
-        Vector3 forwardWS = attachPoint.rotation * axisOffset * Vector3.up;
 
-        // default to full range
-        float maxR = scanRange;
-        if (Physics.Raycast(origin, forwardWS, out var hit, scanRange, obstacleMask))
-            maxR = hit.distance;
-        return maxR;
+        // 1) if buried in geometry, no beam at all
+        if (IsInsideObstacle(origin))
+            return 0f;
+
+        // 2) gather all forward hits
+        RaycastHit[] hits = Physics.RaycastAll(
+            origin, forwardWS, scanRange,
+            obstacleMask,
+            QueryTriggerInteraction.Ignore
+        );
+
+        // 3) find nearest exit‐point
+        float minDist = float.MaxValue;
+        foreach (var h in hits)
+            if (h.distance > 0f && h.distance < minDist)
+                minDist = h.distance;
+
+        // 4) clamp
+        return (minDist < float.MaxValue)
+            ? minDist
+            : scanRange;
     }
 
+    bool IsInsideObstacle(Vector3 origin)
+    {
+        // 1 cm sphere to see if we’re buried in any obstacle collider
+        Collider[] inside = Physics.OverlapSphere(
+            origin,
+            0.01f,
+            obstacleMask,
+            QueryTriggerInteraction.Ignore
+        );
+        return inside.Length > 0;
+    }
 
     #region Cone Generation
     void BuildVisualCone()
