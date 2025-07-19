@@ -5,6 +5,7 @@ using System.Collections;
 public class SceneAwareAudioPlayer : MonoBehaviour
 {
     public AudioSource audioSource;
+    public float delayBeforePlaying = 0f; // Optional delay before playing audio
 
     void Awake()
     {
@@ -31,6 +32,6 @@ public class SceneAwareAudioPlayer : MonoBehaviour
     private IEnumerator PlayAfterFrame()
     {
         yield return new WaitForEndOfFrame();
-        audioSource.Play();
+        audioSource.PlayDelayed(delayBeforePlaying);
     }
 }
