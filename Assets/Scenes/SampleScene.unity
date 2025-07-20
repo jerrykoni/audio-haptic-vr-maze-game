@@ -505,7 +505,7 @@ MonoBehaviour:
   onExitNegativeX: []
   onExitPositiveZ: []
   onExitNegativeZ: []
-  enableDebugLogs: 1
+  enableDebugLogs: 0
 --- !u!65 &86858174
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1056,7 +1056,7 @@ MonoBehaviour:
   - groupIndex: 2
     actionType: 2
     targetAnchors: []
-  enableDebugLogs: 1
+  enableDebugLogs: 0
 --- !u!65 &138052241
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1531,7 +1531,7 @@ MonoBehaviour:
     - {fileID: 2042805297}
     deactivateOnEnter: 1
     reactivateOnEnter: 0
-  enableDebugLogs: 1
+  enableDebugLogs: 0
 --- !u!135 &243018798
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -3184,7 +3184,7 @@ MonoBehaviour:
     - {fileID: 960534198}
     deactivateOnEnter: 0
     reactivateOnEnter: 1
-  enableDebugLogs: 1
+  enableDebugLogs: 0
 --- !u!135 &540353226
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -15834,7 +15834,7 @@ MonoBehaviour:
   - groupIndex: 0
     actionType: 3
     targetAnchors: []
-  enableDebugLogs: 1
+  enableDebugLogs: 0
 --- !u!65 &981166111
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -16855,7 +16855,7 @@ MonoBehaviour:
     - {fileID: 960534198}
     deactivateOnEnter: 0
     reactivateOnEnter: 1
-  enableDebugLogs: 1
+  enableDebugLogs: 0
 --- !u!135 &1220525732
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -23004,7 +23004,7 @@ MonoBehaviour:
     targetAnchors:
     - {fileID: 960534198}
   onExitNegativeZ: []
-  enableDebugLogs: 1
+  enableDebugLogs: 0
 --- !u!65 &1525659737
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -23250,7 +23250,7 @@ MonoBehaviour:
     - {fileID: 551725491}
     deactivateOnEnter: 0
     reactivateOnEnter: 1
-  enableDebugLogs: 1
+  enableDebugLogs: 0
 --- !u!135 &1556515797
 SphereCollider:
   m_ObjectHideFlags: 0
