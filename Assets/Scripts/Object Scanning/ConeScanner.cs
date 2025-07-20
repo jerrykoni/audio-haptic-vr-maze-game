@@ -82,23 +82,31 @@ public class ConeScanner : MonoBehaviour
 
     public void HandleTriggerEnter(Collider other)
     {
-        if (IsValid(other.gameObject))
+        var go = other.gameObject;
+        string layerName = LayerMask.LayerToName(go.layer);
+        Debug.Log($"[ConeScanner] TriggerEnter on '{go.name}' (layer={layerName}, static={go.isStatic})");
+
+        if (!IsValid(go))
         {
-            candidates.Add(other.gameObject);
+            Debug.Log($"[ConeScanner] ➖ Ignored '{go.name}' (wrong layer or not static)");
+            return;
         }
+
+        candidates.Add(go);
+        Debug.Log($"[ConeScanner] ➕ Added '{go.name}'. Count={candidates.Count}");
     }
 
     public void HandleTriggerExit(Collider other)
     {
-        // When an object leaves the trigger, it's no longer a candidate.
-        // UpdateBestTarget in FixedUpdate will handle the logic of losing the target.
-        candidates.Remove(other.gameObject);
+        var go = other.gameObject;
+        if (candidates.Remove(go))
+            Debug.Log($"[ConeScanner] ➖ Removed '{go.name}'. Count={candidates.Count}");
     }
 
     bool IsValid(GameObject go)
     {
         int bit = 1 << go.layer;
-        return go.isStatic && (scannableLayer.value & bit) != 0;
+        return (scannableLayer.value & bit) != 0;
     }
 
     void UpdateBestTarget()
