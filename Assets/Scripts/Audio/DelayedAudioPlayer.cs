@@ -3,7 +3,11 @@ using UnityEngine;
 [RequireComponent(typeof(AudioSource))]
 public class DelayedAudioPlayer : MonoBehaviour
 {
+    [Tooltip("If true, the audio can only be played once.")]
+    [SerializeField] private bool playOnlyOnce = false;
+
     private AudioSource audioSource;
+    private bool hasPlayed = false;
 
     void Awake()
     {
@@ -36,13 +40,23 @@ public class DelayedAudioPlayer : MonoBehaviour
 
     /// <summary>
     /// Plays the audio source after a specified delay, only if it is not already playing.
+    /// If playOnlyOnce is true, it will only play the first time this method is called.
     /// </summary>
     /// <param name="delayBeforePlaying">The delay in seconds before the audio will play.</param>
     public void PlayWithDelay(float delayBeforePlaying)
     {
+        if (playOnlyOnce && hasPlayed)
+        {
+            return;
+        }
+
         if (audioSource != null && !audioSource.isPlaying)
         {
             audioSource.PlayDelayed(delayBeforePlaying);
+            if (playOnlyOnce)
+            {
+                hasPlayed = true;
+            }
         }
     }
 }
