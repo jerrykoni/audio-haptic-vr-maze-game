@@ -7,6 +7,7 @@ TagManager:
   - Anchor
   - Scannable
   - Obstacle
+  - UpwardObstacle
   layers:
   - Default
   - TransparentFX
