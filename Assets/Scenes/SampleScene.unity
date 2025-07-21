@@ -905,6 +905,8 @@ GameObject:
   m_Component:
   - component: {fileID: 105398352}
   - component: {fileID: 105398350}
+  - component: {fileID: 105398354}
+  - component: {fileID: 105398353}
   m_Layer: 0
   m_Name: Rotate_your_head
   m_TagString: Untagged
@@ -1024,6 +1026,39 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &105398353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 105398349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d9f08881c2b91042ba2fa66a4b0eb04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playOnlyOnce: 0
+  normalSnapshot: {fileID: 24500006, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
+  duckSnapshot: {fileID: 8366920546972209600, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
+  duckTransitionTime: 0.5
+  returnTransitionTime: 0.5
+--- !u!114 &105398354
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 105398349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a07f270ac36c49789466c75ceb88424c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableSpatialization: 0
+  gainBoostDb: 0
+  enableAcoustics: 0
+  reverbSendDb: 0
 --- !u!1001 &121540063
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3567,6 +3602,8 @@ GameObject:
   m_Component:
   - component: {fileID: 330871960}
   - component: {fileID: 330871959}
+  - component: {fileID: 330871962}
+  - component: {fileID: 330871961}
   m_Layer: 0
   m_Name: Checkpoint_Reach
   m_TagString: Untagged
@@ -3686,6 +3723,38 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &330871961
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330871958}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb057c299d42cd34cab167326d26c52a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  normalSnapshot: {fileID: 24500006, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
+  duckSnapshot: {fileID: 8366920546972209600, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
+  duckTransitionTime: 0.3
+  returnTransitionTime: 0.3
+--- !u!114 &330871962
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330871958}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a07f270ac36c49789466c75ceb88424c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableSpatialization: 0
+  gainBoostDb: 0
+  enableAcoustics: 0
+  reverbSendDb: 0
 --- !u!1001 &332701437
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9992,7 +10061,7 @@ AudioSource:
   m_GameObject: {fileID: 515807784}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 9064460506412183893, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
   m_audioClip: {fileID: 8300000, guid: 7ea443b9e24e64494b5e3f76aa0abf35, type: 3}
   m_Resource: {fileID: 8300000, guid: 7ea443b9e24e64494b5e3f76aa0abf35, type: 3}
   m_PlayOnAwake: 0
@@ -10206,7 +10275,7 @@ GameObject:
   - component: {fileID: 529825093}
   - component: {fileID: 529825092}
   - component: {fileID: 529825091}
-  - component: {fileID: 529825090}
+  - component: {fileID: 529825094}
   m_Layer: 0
   m_Name: CheckpointTwo
   m_TagString: Untagged
@@ -10214,19 +10283,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &529825090
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 529825089}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c0d7c4d3030cf94fa03613a2cb0d844, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playOnlyOnce: 0
 --- !u!114 &529825091
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10355,6 +10411,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &529825094
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 529825089}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d9f08881c2b91042ba2fa66a4b0eb04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playOnlyOnce: 0
+  normalSnapshot: {fileID: 24500006, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
+  duckSnapshot: {fileID: 8366920546972209600, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
+  duckTransitionTime: 0.5
+  returnTransitionTime: 0.5
 --- !u!4 &537986224 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1339953525664567771, guid: f9d8bb3d7d1457e47a4659f6f544b263, type: 3}
@@ -22037,15 +22110,15 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
-      - m_Target: {fileID: 814716383}
-        m_TargetAssemblyTypeName: DelayedAudioPlayer, Assembly-CSharp
+      - m_Target: {fileID: 814716387}
+        m_TargetAssemblyTypeName: MixerDuckingAudioPlayer, Assembly-CSharp
         m_MethodName: PlayWithDelay
         m_Mode: 4
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
-          m_FloatArgument: 0
+          m_FloatArgument: 1
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
@@ -22057,7 +22130,7 @@ MonoBehaviour:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
-          m_FloatArgument: 2
+          m_FloatArgument: 6.5
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
@@ -22069,7 +22142,19 @@ MonoBehaviour:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
-          m_FloatArgument: 2
+          m_FloatArgument: 6.5
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 1851311233}
+        m_TargetAssemblyTypeName: DelayedAudioPlayer, Assembly-CSharp
+        m_MethodName: PlayWithDelay
+        m_Mode: 4
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 2.5
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
@@ -22183,7 +22268,7 @@ AudioSource:
   m_GameObject: {fileID: 704322551}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 9064460506412183893, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
   m_audioClip: {fileID: 8300000, guid: 0d82a120abb1be2469320d8bec0b1332, type: 3}
   m_Resource: {fileID: 8300000, guid: 0d82a120abb1be2469320d8bec0b1332, type: 3}
   m_PlayOnAwake: 0
@@ -23313,7 +23398,7 @@ GameObject:
   - component: {fileID: 814716386}
   - component: {fileID: 814716385}
   - component: {fileID: 814716384}
-  - component: {fileID: 814716383}
+  - component: {fileID: 814716387}
   m_Layer: 0
   m_Name: CheckpointThree
   m_TagString: Untagged
@@ -23321,19 +23406,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &814716383
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 814716382}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c0d7c4d3030cf94fa03613a2cb0d844, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playOnlyOnce: 0
 --- !u!114 &814716384
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23462,6 +23534,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &814716387
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 814716382}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d9f08881c2b91042ba2fa66a4b0eb04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playOnlyOnce: 0
+  normalSnapshot: {fileID: 24500006, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
+  duckSnapshot: {fileID: 8366920546972209600, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
+  duckTransitionTime: 0.5
+  returnTransitionTime: 0.5
 --- !u!1 &825024708
 GameObject:
   m_ObjectHideFlags: 0
@@ -23519,7 +23608,7 @@ AudioSource:
   m_GameObject: {fileID: 825024708}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 1144506126212865047, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
   m_audioClip: {fileID: 8300000, guid: 8fd3b5c14f552d04580cd1dff22b2167, type: 3}
   m_Resource: {fileID: 8300000, guid: 8fd3b5c14f552d04580cd1dff22b2167, type: 3}
   m_PlayOnAwake: 0
@@ -29428,15 +29517,15 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
-      - m_Target: {fileID: 1950753392}
-        m_TargetAssemblyTypeName: DelayedAudioPlayer, Assembly-CSharp
+      - m_Target: {fileID: 1950753396}
+        m_TargetAssemblyTypeName: MixerDuckingAudioPlayer, Assembly-CSharp
         m_MethodName: PlayWithDelay
         m_Mode: 4
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
-          m_FloatArgument: 0
+          m_FloatArgument: 1
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
@@ -34905,7 +34994,7 @@ GameObject:
   - component: {fileID: 982348852}
   - component: {fileID: 982348851}
   - component: {fileID: 982348850}
-  - component: {fileID: 982348849}
+  - component: {fileID: 982348853}
   m_Layer: 0
   m_Name: WallAlert
   m_TagString: Untagged
@@ -34913,19 +35002,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &982348849
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 982348848}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c0d7c4d3030cf94fa03613a2cb0d844, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playOnlyOnce: 1
 --- !u!114 &982348850
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -35054,6 +35130,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &982348853
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 982348848}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d9f08881c2b91042ba2fa66a4b0eb04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playOnlyOnce: 1
+  normalSnapshot: {fileID: 24500006, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
+  duckSnapshot: {fileID: 8366920546972209600, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
+  duckTransitionTime: 0.5
+  returnTransitionTime: 0.5
 --- !u!4 &984511175 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1339953525664567771, guid: f9d8bb3d7d1457e47a4659f6f544b263, type: 3}
@@ -35175,7 +35268,7 @@ AudioSource:
   m_GameObject: {fileID: 1001003618}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 9064460506412183893, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
   m_audioClip: {fileID: 8300000, guid: c5dae4c684c9db44daf1a5d967ee58e1, type: 3}
   m_Resource: {fileID: 8300000, guid: c5dae4c684c9db44daf1a5d967ee58e1, type: 3}
   m_PlayOnAwake: 0
@@ -46497,8 +46590,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
-      - m_Target: {fileID: 529825090}
+      - m_Target: {fileID: 1293483250}
         m_TargetAssemblyTypeName: DelayedAudioPlayer, Assembly-CSharp
+        m_MethodName: PlayWithDelay
+        m_Mode: 4
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 529825094}
+        m_TargetAssemblyTypeName: MixerDuckingAudioPlayer, Assembly-CSharp
         m_MethodName: PlayWithDelay
         m_Mode: 4
         m_Arguments:
@@ -46542,18 +46647,6 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 11
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
-      - m_Target: {fileID: 1293483250}
-        m_TargetAssemblyTypeName: DelayedAudioPlayer, Assembly-CSharp
-        m_MethodName: PlayWithDelay
-        m_Mode: 4
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
@@ -47346,7 +47439,7 @@ AudioSource:
   m_GameObject: {fileID: 1293483246}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 9064460506412183893, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
   m_audioClip: {fileID: 8300000, guid: 0388a3460cc96db438c33c8e98a0377b, type: 3}
   m_Resource: {fileID: 8300000, guid: 0388a3460cc96db438c33c8e98a0377b, type: 3}
   m_PlayOnAwake: 0
@@ -58818,9 +58911,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
-      - m_Target: {fileID: 105398350}
-        m_TargetAssemblyTypeName: UnityEngine.AudioSource, UnityEngine
-        m_MethodName: PlayDelayed
+      - m_Target: {fileID: 105398353}
+        m_TargetAssemblyTypeName: MixerDuckingAudioPlayer, Assembly-CSharp
+        m_MethodName: PlayWithDelay
         m_Mode: 4
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -71013,6 +71106,166 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1339953525664567771, guid: f9d8bb3d7d1457e47a4659f6f544b263, type: 3}
   m_PrefabInstance: {fileID: 1169603671}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1851311232
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1851311236}
+  - component: {fileID: 1851311235}
+  - component: {fileID: 1851311234}
+  - component: {fileID: 1851311233}
+  m_Layer: 0
+  m_Name: UpwardObstaclesMay
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1851311233
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1851311232}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c0d7c4d3030cf94fa03613a2cb0d844, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playOnlyOnce: 1
+--- !u!114 &1851311234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1851311232}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a07f270ac36c49789466c75ceb88424c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableSpatialization: 0
+  gainBoostDb: 0
+  enableAcoustics: 0
+  reverbSendDb: 0
+--- !u!82 &1851311235
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1851311232}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: 3fce9d7bbc7bc3c4ea18a954f0e0669f, type: 3}
+  m_Resource: {fileID: 8300000, guid: 3fce9d7bbc7bc3c4ea18a954f0e0669f, type: 3}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!4 &1851311236
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1851311232}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.3138, y: 0.1, z: 1.96841}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1861699307
 GameObject:
   m_ObjectHideFlags: 0
@@ -71136,7 +71389,7 @@ AudioSource:
   m_GameObject: {fileID: 1866201079}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 9064460506412183893, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
   m_audioClip: {fileID: 8300000, guid: 0284b2664a68c4540809d565bb5059ce, type: 3}
   m_Resource: {fileID: 8300000, guid: 0284b2664a68c4540809d565bb5059ce, type: 3}
   m_PlayOnAwake: 0
@@ -76303,7 +76556,7 @@ AudioSource:
   m_GameObject: {fileID: 1899201012}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 9064460506412183893, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
   m_audioClip: {fileID: 8300000, guid: 9898beef4edd54ee58d263cec6ef1795, type: 3}
   m_Resource: {fileID: 8300000, guid: 9898beef4edd54ee58d263cec6ef1795, type: 3}
   m_PlayOnAwake: 0
@@ -76533,7 +76786,7 @@ GameObject:
   - component: {fileID: 1950753395}
   - component: {fileID: 1950753394}
   - component: {fileID: 1950753393}
-  - component: {fileID: 1950753392}
+  - component: {fileID: 1950753396}
   m_Layer: 0
   m_Name: CheckpointFour
   m_TagString: Untagged
@@ -76541,19 +76794,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1950753392
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1950753391}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c0d7c4d3030cf94fa03613a2cb0d844, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playOnlyOnce: 0
 --- !u!114 &1950753393
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -76580,8 +76820,8 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 15cae978136cbc74cbf5955838b87178, type: 3}
-  m_Resource: {fileID: 8300000, guid: 15cae978136cbc74cbf5955838b87178, type: 3}
+  m_audioClip: {fileID: 8300000, guid: ee2abc908830cb949aab27989c22aad5, type: 3}
+  m_Resource: {fileID: 8300000, guid: ee2abc908830cb949aab27989c22aad5, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -76682,6 +76922,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1950753396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1950753391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d9f08881c2b91042ba2fa66a4b0eb04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playOnlyOnce: 0
+  normalSnapshot: {fileID: 24500006, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
+  duckSnapshot: {fileID: 8366920546972209600, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
+  duckTransitionTime: 0.5
+  returnTransitionTime: 0.5
 --- !u!1001 &1966080624
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -77500,6 +77757,7 @@ GameObject:
   - component: {fileID: 2026364799}
   - component: {fileID: 2026364798}
   - component: {fileID: 2026364797}
+  - component: {fileID: 2026364800}
   m_Layer: 0
   m_Name: Name_Audio
   m_TagString: Untagged
@@ -77635,6 +77893,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2026364800
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2026364796}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb057c299d42cd34cab167326d26c52a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  normalSnapshot: {fileID: 24500006, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
+  duckSnapshot: {fileID: 8366920546972209600, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
+  duckTransitionTime: 0.3
+  returnTransitionTime: 0.5
 --- !u!1 &2026526800
 GameObject:
   m_ObjectHideFlags: 0
@@ -77668,8 +77942,8 @@ MonoBehaviour:
   OnPlayerEnter:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 982348849}
-        m_TargetAssemblyTypeName: DelayedAudioPlayer, Assembly-CSharp
+      - m_Target: {fileID: 982348853}
+        m_TargetAssemblyTypeName: MixerDuckingAudioPlayer, Assembly-CSharp
         m_MethodName: PlayWithDelay
         m_Mode: 4
         m_Arguments:
@@ -99787,17 +100061,18 @@ SceneRoots:
   - {fileID: 1866201083}
   - {fileID: 825024712}
   - {fileID: 1001003622}
-  - {fileID: 982348852}
   - {fileID: 1283609639}
+  - {fileID: 675718950}
+  - {fileID: 982348852}
+  - {fileID: 105398352}
   - {fileID: 398523592}
   - {fileID: 529825093}
+  - {fileID: 1851311236}
   - {fileID: 814716386}
   - {fileID: 1950753395}
   - {fileID: 133495203}
   - {fileID: 330871960}
   - {fileID: 557621721}
-  - {fileID: 675718950}
-  - {fileID: 105398352}
   - {fileID: 1974237291}
   - {fileID: 158683742}
   - {fileID: 2026526803}
