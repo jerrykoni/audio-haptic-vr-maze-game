@@ -10,6 +10,8 @@ TagManager:
   - UpwardObstacle
   - Door
   - Tree
+  - MovingObstacle
+  - MixedObstacle
   layers:
   - Default
   - TransparentFX
