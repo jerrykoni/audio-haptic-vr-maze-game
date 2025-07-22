@@ -1,0 +1,137 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1233149941 &-9218839918464166128
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Footsteps_Walk_Grass_Mono_07_{-9218839918464166128}
+  m_AudioClip: {fileID: 8300000, guid: fc32c6fd07980144996b811e5d1f2971, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &-8854779644780517639
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Footsteps_Walk_Grass_Mono_02_{-8854779644780517639}
+  m_AudioClip: {fileID: 8300000, guid: 18e761ff5ef14fd4588d9283fcc9b829, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &-8657922742510690044
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Footsteps_Walk_Grass_Mono_10_{-8657922742510690044}
+  m_AudioClip: {fileID: 8300000, guid: 5799109e817d3704889f0499d06a23be, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &-4722605420949669357
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Footsteps_Walk_Grass_Mono_03_{-4722605420949669357}
+  m_AudioClip: {fileID: 8300000, guid: 9c0c1f9411026f749bcb3746cd557bec, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &-857301140187314829
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Footsteps_Walk_Grass_Mono_01_{-857301140187314829}
+  m_AudioClip: {fileID: 8300000, guid: 551d550ab98e3cc4bb7793e752fe8628, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &-480627714106874085
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Footsteps_Walk_Grass_Mono_05_{-480627714106874085}
+  m_AudioClip: {fileID: 8300000, guid: a62172e6f7275ff4f94c17edc8dfdd0d, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &883603507452106212
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Footsteps_Walk_Grass_Mono_09_{883603507452106212}
+  m_AudioClip: {fileID: 8300000, guid: 56ea356e65429294f9098ef523fdb70b, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &2271436759736579935
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Footsteps_Walk_Grass_Mono_08_{2271436759736579935}
+  m_AudioClip: {fileID: 8300000, guid: 030e6a43a7d08bd4581668d53a9808f4, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &4492991987119848078
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Footsteps_Walk_Grass_Mono_06_{4492991987119848078}
+  m_AudioClip: {fileID: 8300000, guid: 6a0b4267ac8ee8448b619bc9a3bca6d9, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &5268614215170084309
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Footsteps_Walk_Grass_Mono_04_{5268614215170084309}
+  m_AudioClip: {fileID: 8300000, guid: 38cb68a2a49e89c46bea091d75b27976, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1307931743 &6418180475301049370
+AudioRandomContainer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: FootstepsGrass
+  m_Volume: 0
+  m_Pitch: 0
+  m_AutomaticTriggerTime: 0
+  m_LoopCount: 1
+  m_VolumeRandomizationRange: {x: -2, y: 4}
+  m_PitchRandomizationRange: {x: -200, y: 200}
+  m_AutomaticTriggerTimeRandomizationRange: {x: 0, y: 0}
+  m_LoopCountRandomizationRange: {x: 0, y: 0}
+  m_Elements:
+  - {fileID: -857301140187314829}
+  - {fileID: -8854779644780517639}
+  - {fileID: -4722605420949669357}
+  - {fileID: 5268614215170084309}
+  - {fileID: -480627714106874085}
+  - {fileID: 4492991987119848078}
+  - {fileID: -9218839918464166128}
+  - {fileID: 2271436759736579935}
+  - {fileID: 883603507452106212}
+  - {fileID: -8657922742510690044}
+  m_AvoidRepeatingLast: 2
+  m_PlaybackMode: 2
+  m_TriggerMode: 0
+  m_AutomaticTriggerMode: 1
+  m_LoopMode: 2
+  m_VolumeRandomizationEnabled: 0
+  m_PitchRandomizationEnabled: 1
+  m_AutomaticTriggerTimeRandomizationEnabled: 0
+  m_LoopCountRandomizationEnabled: 0

@@ -8,6 +8,8 @@ TagManager:
   - Scannable
   - Obstacle
   - UpwardObstacle
+  - Door
+  - Tree
   layers:
   - Default
   - TransparentFX
