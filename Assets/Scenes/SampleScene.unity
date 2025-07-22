@@ -32567,7 +32567,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   audioController: {fileID: 919513128}
   anchorGroups:
-  - groupIndex: 5
+  - groupIndex: 7
     targetAnchors:
     - {fileID: 1675455372}
     deactivateOnEnter: 1
@@ -48154,7 +48154,7 @@ MonoBehaviour:
   onEnterPositiveZ: []
   onEnterNegativeZ: []
   onExitPositiveX:
-  - groupIndex: 5
+  - groupIndex: 7
     actionType: 3
     targetAnchors: []
   onExitNegativeX: []
