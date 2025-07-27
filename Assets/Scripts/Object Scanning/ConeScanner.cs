@@ -42,8 +42,8 @@ public class ConeScanner : MonoBehaviour
     private GameObject physGO;
 
     private readonly HashSet<GameObject> candidates = new();
+    private readonly Collider[] _obstacleCheckCache = new Collider[1];
     private GameObject currentTarget;
-    private float lastAngle, lastRange;
     private Quaternion axisOffset = Quaternion.identity;
     private Vector3 defaultConeRotation;
     private Transform defaultAttachPoint;      // remembers the controller
@@ -63,8 +63,6 @@ public class ConeScanner : MonoBehaviour
         axisOffset = Quaternion.Euler(coneRotation);
         BuildVisualCone();
         BuildPhysicsCone();
-        lastAngle = scanAngle;
-        lastRange = scanRange;
     }
 
     void Update()
@@ -204,13 +202,15 @@ public class ConeScanner : MonoBehaviour
 
     bool IsInsideObstacle(Vector3 origin)
     {
-        Collider[] inside = Physics.OverlapSphere(
+        int hitCount = Physics.OverlapSphereNonAlloc(
             origin,
             0.01f,
+            _obstacleCheckCache, // Use our cached array
             obstacleMask,
             QueryTriggerInteraction.Ignore
         );
-        return inside.Length > 0;
+
+        return hitCount > 0;
     }
 
 
