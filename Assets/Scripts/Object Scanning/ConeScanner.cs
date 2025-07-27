@@ -7,6 +7,9 @@ public class ConeScanner : MonoBehaviour
     [Header("Target")]
     [Tooltip("The Transform that the cone will be attached to and follow.")]
     public Transform attachPoint;
+    [Tooltip("Headset camera or head anchor transform.")]
+    public Transform headsetTransform;
+
 
     [Header("Cone Settings")]
     [Range(1f, 89f)] public float scanAngle = 30f;
@@ -21,9 +24,12 @@ public class ConeScanner : MonoBehaviour
     [Header("Orientation")]
     [Tooltip("Local rotation angles (X, Y, Z) to apply as an offset to the attachPoint's rotation.")]
     public Vector3 coneRotation = Vector3.zero;
+    public Vector3 headsetConeRotation = new(90f, 0f, 0f);
 
     [Header("Visuals")]
     public Material coneMaterial;
+    [Tooltip("How far from the anchor to start drawing the cone when attached to the headset. This 'cuts' the tip off visually.")]
+    public float headsetVisualStartOffset = 0.5f;
 
     // Fires when we gain a new closest object
     public event Action<GameObject> OnObjectDetected;
@@ -39,11 +45,20 @@ public class ConeScanner : MonoBehaviour
     private GameObject currentTarget;
     private float lastAngle, lastRange;
     private Quaternion axisOffset = Quaternion.identity;
+    private Vector3 defaultConeRotation;
+    private Transform defaultAttachPoint;      // remembers the controller
+    private bool isAttachedToHeadset = false;  // current state
 
     void Awake()
     {
         if (attachPoint == null)
-            Debug.LogError("Attach Point Transform has not been assigned!", this);
+            Debug.LogError("Attach Point not assigned!", this);
+        if (headsetTransform == null)
+            Debug.LogError("Headset Transform not assigned!", this);
+
+        // Remember initial values 
+        defaultAttachPoint = attachPoint;
+        defaultConeRotation = coneRotation;
 
         axisOffset = Quaternion.Euler(coneRotation);
         BuildVisualCone();
@@ -56,19 +71,45 @@ public class ConeScanner : MonoBehaviour
     {
         if (attachPoint == null) return;
 
-        visualGO.transform.SetPositionAndRotation(
-            attachPoint.position,
-            attachPoint.rotation * axisOffset);
+        // Base rotation is always set first
+        Quaternion baseRotation = attachPoint.rotation * axisOffset;
 
-        // shrink/extend to hit‐point or max
-        float effRange = GetEffectiveRange();
-        ScaleCone(visualGO.transform, effRange);
+        // --- Visual Cone Logic ---
+        if (visualGO != null)
+        {
+            // Set position and rotation from attach point
+            visualGO.transform.SetPositionAndRotation(attachPoint.position, baseRotation);
+
+            // Determine the cone's full length based on raycast hits
+            float effRange = GetEffectiveRange();
+
+            // If attached to headset, apply the visual offset
+            if (isAttachedToHeadset)
+            {
+                // The direction the cone's tip points (its local Y-axis)
+                Vector3 coneForward = visualGO.transform.up;
+
+                // Move the cone's pivot forward by the offset amount
+                visualGO.transform.position += coneForward * headsetVisualStartOffset;
+
+                // Shorten the cone's length by the same amount so the base stays in place
+                float visualLength = Mathf.Max(0, effRange - headsetVisualStartOffset);
+                ScaleCone(visualGO.transform, visualLength);
+            }
+            else
+            {
+                // If not on headset, scale normally
+                ScaleCone(visualGO.transform, effRange);
+            }
+        }
     }
+
 
     void FixedUpdate()
     {
         if (attachPoint == null) return;
 
+        // --- Physics Cone Logic (remains unchanged) ---
         physGO.transform.SetPositionAndRotation(
             attachPoint.position,
             attachPoint.rotation * axisOffset);
@@ -76,7 +117,6 @@ public class ConeScanner : MonoBehaviour
         float effRange = GetEffectiveRange();
         ScaleCone(physGO.transform, effRange);
 
-        // now run your scanning logic as before…
         UpdateBestTarget();
     }
 
@@ -90,8 +130,6 @@ public class ConeScanner : MonoBehaviour
 
     public void HandleTriggerExit(Collider other)
     {
-        // When an object leaves the trigger, it's no longer a candidate.
-        // UpdateBestTarget in FixedUpdate will handle the logic of losing the target.
         candidates.Remove(other.gameObject);
     }
 
@@ -123,25 +161,19 @@ public class ConeScanner : MonoBehaviour
             }
         }
 
-        // This block handles the original OnObjectDetected and OnObjectLost events.
-        // It only fires when the target *changes*. This logic is preserved.
         if (best != currentTarget)
         {
             if (currentTarget != null)
             {
                 OnObjectLost?.Invoke(currentTarget);
             }
-
             currentTarget = best;
-
             if (currentTarget != null)
             {
                 OnObjectDetected?.Invoke(currentTarget);
             }
         }
 
-        // This new block fires OnObjectUpdated every frame there IS a target,
-        // providing the continuous distance data needed for the haptics.
         if (currentTarget != null)
         {
             OnObjectUpdated?.Invoke(currentTarget, Mathf.Sqrt(bestDistSqr));
@@ -150,36 +182,28 @@ public class ConeScanner : MonoBehaviour
 
     float GetEffectiveRange()
     {
-        // world‐space data
         Vector3 forwardWS = (attachPoint.rotation * axisOffset * Vector3.up).normalized;
         Vector3 origin = attachPoint.position;
 
-        // 1) if buried in geometry, no beam at all
         if (IsInsideObstacle(origin))
             return 0f;
 
-        // 2) gather all forward hits
         RaycastHit[] hits = Physics.RaycastAll(
             origin, forwardWS, scanRange,
             obstacleMask,
             QueryTriggerInteraction.Ignore
         );
 
-        // 3) find nearest exit‐point
         float minDist = float.MaxValue;
         foreach (var h in hits)
             if (h.distance > 0f && h.distance < minDist)
                 minDist = h.distance;
 
-        // 4) clamp
-        return (minDist < float.MaxValue)
-            ? minDist
-            : scanRange;
+        return (minDist < float.MaxValue) ? minDist : scanRange;
     }
 
     bool IsInsideObstacle(Vector3 origin)
     {
-        // 1 cm sphere to see if we’re buried in any obstacle collider
         Collider[] inside = Physics.OverlapSphere(
             origin,
             0.01f,
@@ -187,6 +211,29 @@ public class ConeScanner : MonoBehaviour
             QueryTriggerInteraction.Ignore
         );
         return inside.Length > 0;
+    }
+
+
+    /// <summary>
+    /// Call this (e.g. via your button event) to flip between controller & headset.
+    /// </summary>
+    public void ToggleAttachment()
+    {
+        isAttachedToHeadset = !isAttachedToHeadset; // Invert the state
+
+        if (isAttachedToHeadset)
+        {
+            attachPoint = headsetTransform;
+            coneRotation = headsetConeRotation;
+        }
+        else
+        {
+            attachPoint = defaultAttachPoint;
+            coneRotation = defaultConeRotation;
+        }
+
+        // Update the rotation offset for the new attachment
+        axisOffset = Quaternion.Euler(coneRotation);
     }
 
     #region Cone Generation

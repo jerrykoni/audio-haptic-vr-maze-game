@@ -208,10 +208,22 @@ public class UnifiedHapticsManager : MonoBehaviour
         _poolIndex = (_poolIndex + 1) % _hoverAudioSourcePool.Count;
     }
 
+    /// <summary>
+    /// Toggles the active controller for scanning haptics, cycling between Right and Both.
+    /// This allows changing the haptic feedback mode at runtime.
+    /// </summary>
+    public void ToggleHapticControllers()
+    {
+        if (scanController == HapticController.Right)
+        {
+            scanController = HapticController.Both;
+        }
+        else // This covers the 'Both' case and will switch it back to 'Right'.
+        {
+            scanController = HapticController.Right;
+        }
+    }
 
-    // --- UNCHANGED METHODS ---
-
-    #region Unchanged Methods
     private void PlayPulse(float frequency, float intensity, float duration)
     {
         if (!_leftWallHapticsActive && ShouldUseController(OVRInput.Controller.LTouch))
@@ -239,13 +251,13 @@ public class UnifiedHapticsManager : MonoBehaviour
 
     bool ShouldUseController(OVRInput.Controller controller)
     {
-        switch (scanController)
+        return scanController switch
         {
-            case HapticController.Left: return controller == OVRInput.Controller.LTouch;
-            case HapticController.Right: return controller == OVRInput.Controller.RTouch;
-            case HapticController.Both: return true;
-            default: return true;
-        }
+            HapticController.Left => controller == OVRInput.Controller.LTouch,
+            HapticController.Right => controller == OVRInput.Controller.RTouch,
+            HapticController.Both => true,
+            _ => true,
+        };
     }
 
     IEnumerator WallHapticFeedbackLoop()
@@ -309,5 +321,4 @@ public class UnifiedHapticsManager : MonoBehaviour
             Gizmos.DrawWireSphere(rightHandAnchor.position, detectionRadius);
         }
     }
-    #endregion
 }
