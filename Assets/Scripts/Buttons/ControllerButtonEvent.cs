@@ -10,16 +10,36 @@ public class ControllerButtonEvent : MonoBehaviour
     [Tooltip("Which controller(s) to listen on?")]
     public OVRInput.Controller controller = OVRInput.Controller.RTouch;
 
-    [Header("Event")]
-    [Tooltip("Event invoked on button-down.")]
+    [Header("Events")]
+    [Tooltip("Event invoked on every button-down.")]
     public UnityEvent onButtonDown;
+
+    [Header("Toggling Event")]
+    [Tooltip("A boolean that tracks the current toggle state. True is 'On', False is 'Off'.")]
+    private bool toggleState = false;
+
+    [Tooltip("Event invoked on the second press, fourth press, etc. (toggles OFF)")]
+    public UnityEvent onToggleOn;
+
+    [Tooltip("Event invoked on the first press, third press, etc. (toggles ON)")]
+    public UnityEvent onToggleOff;
 
     void Update()
     {
-        // Check if the specified button was pressed this frame
         if (OVRInput.GetDown(button, controller))
         {
-            onButtonDown.Invoke();
+            onButtonDown?.Invoke();
+
+            if (toggleState)
+            {
+                onToggleOn?.Invoke();
+            }
+            else
+            {
+                onToggleOff?.Invoke();
+            }
+
+            toggleState = !toggleState;
         }
     }
 }
