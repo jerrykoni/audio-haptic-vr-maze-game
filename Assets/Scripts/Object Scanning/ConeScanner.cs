@@ -38,6 +38,9 @@ public class ConeScanner : MonoBehaviour
     // Fires continuously with the current target and its distance
     public event Action<GameObject, float> OnObjectUpdated;
 
+    //Expose the private currentTarget variable
+    public GameObject CurrentTarget => currentTarget;
+
     private GameObject visualGO;
     private GameObject physGO;
 

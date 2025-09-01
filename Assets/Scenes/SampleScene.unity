@@ -10160,6 +10160,65 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf7605932bc514945adb3803a0be2ed9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &292834151
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 292834153}
+  - component: {fileID: 292834152}
+  m_Layer: 0
+  m_Name: ConeScannerLeft
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &292834152
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 292834151}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78151d0245ff2a447a17887568b2f4cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attachPoint: {fileID: 1939473583}
+  headsetTransform: {fileID: 2139036001}
+  scanAngle: 5
+  scanRange: 6
+  resolution: 16
+  scannableLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 128
+  coneRotation: {x: 45, y: 0, z: 0}
+  headsetConeRotation: {x: 90, y: 0, z: 0}
+  coneMaterial: {fileID: 2100000, guid: c9b1a79b9d91f3a4aa911aa115555c68, type: 2}
+  headsetVisualStartOffset: 0.3
+--- !u!4 &292834153
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 292834151}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &294753975
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -34652,14 +34711,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   leftHandAnchor: {fileID: 1939473583}
   rightHandAnchor: {fileID: 1266988950}
+  leftConeScanner: {fileID: 292834152}
+  rightConeScanner: {fileID: 859010868}
+  leftAudioManager: {fileID: 1491745277}
+  rightAudioManager: {fileID: 1861699308}
   detectionRadius: 0.5
   maxHapticDistance: 0.5
   hapticCheckInterval: 0.1
   wallHapticFrequency: 0.1
   wallLayer:
     serializedVersion: 2
-    m_Bits: 128
-  scanController: 1
+    m_Bits: 384
   scanPulseFrequency: 0.5
   scanPulseIntensity: 0.8
   scanPulseDuration: 0.02
@@ -34669,8 +34731,6 @@ MonoBehaviour:
   maxScanStayPulseInterval: 0.74
   maxProximityDistance: 6
   audioSourcePoolSize: 8
-  audioManager: {fileID: 1861699308}
-  coneScanner: {fileID: 859010868}
 --- !u!4 &611968543
 Transform:
   m_ObjectHideFlags: 0
@@ -61313,6 +61373,72 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!1 &1076089350
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1076089352}
+  - component: {fileID: 1076089351}
+  m_Layer: 0
+  m_Name: HapticsControllerLeft
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &1076089351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1076089350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dd7a9e227b73b449aa25718fefca1ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  leftHandAnchor: {fileID: 1939473583}
+  rightHandAnchor: {fileID: 1266988950}
+  leftConeScanner: {fileID: 0}
+  rightConeScanner: {fileID: 0}
+  leftAudioManager: {fileID: 0}
+  rightAudioManager: {fileID: 0}
+  detectionRadius: 0.5
+  maxHapticDistance: 0.5
+  hapticCheckInterval: 0.1
+  wallHapticFrequency: 0.1
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  scanPulseFrequency: 0.5
+  scanPulseIntensity: 0.8
+  scanPulseDuration: 0.02
+  scanStayFrequency: 0.2
+  scanStayIntensity: 0.6
+  minScanStayPulseInterval: 0.15
+  maxScanStayPulseInterval: 0.74
+  maxProximityDistance: 6
+  audioSourcePoolSize: 8
+--- !u!4 &1076089352
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1076089350}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1076263187
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -80568,6 +80694,105 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f9d8bb3d7d1457e47a4659f6f544b263, type: 3}
+--- !u!1 &1491745276
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1491745279}
+  - component: {fileID: 1491745278}
+  - component: {fileID: 1491745277}
+  m_Layer: 0
+  m_Name: ScanAudioManagerLeft
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1491745277
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1491745276}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1b8aac568d24a44292248066dcbd1d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  nameAudioSource: {fileID: 2026364798}
+  hoverAudioSource: {fileID: 1018547535}
+  hoverStayAudioSource: {fileID: 1654261527}
+  hoverSound: {fileID: 8300000, guid: 1310bd00360df084e96ccc9a42f601b7, type: 3}
+  hoverSoundVolume: 1
+  hoverSoundPitch: 1
+  hoverStaySound: {fileID: 8300000, guid: 4393389c4e9969940bfda2dc7f786204, type: 3}
+  hoverStaySoundVolume: 1
+  hoverStaySoundPitch: 1
+  unhoverSound: {fileID: 8300000, guid: 0ae074243bcbf57468d433ad4f78acbb, type: 3}
+  unhoverSoundVolume: 1
+  unhoverSoundPitch: 1
+  objectAudioMappings:
+  - objectTag: Obstacle
+    audioClip: {fileID: 8300000, guid: 6b5e666c4b670a14aa285329336d02f8, type: 3}
+  - objectTag: UpwardObstacle
+    audioClip: {fileID: 8300000, guid: f4676217703b9fc4a8bbe243b66520ba, type: 3}
+  - objectTag: MixedObstacle
+    audioClip: {fileID: 8300000, guid: eb58dd9eccb740c42be8882fb078028d, type: 3}
+  - objectTag: MovingObstacle
+    audioClip: {fileID: 8300000, guid: 40632441c70d7bd49afbbbe7c63d7e11, type: 3}
+  - objectTag: Tree
+    audioClip: {fileID: 8300000, guid: eb58dd9eccb740c42be8882fb078028d, type: 3}
+  hoverToNameDelay: 0.2
+  minTimeBetweenScans: 0.1
+  useTTSFallback: 0
+  ttsVolume: 0.8
+  OnTTSRequested:
+    m_PersistentCalls:
+      m_Calls: []
+  OnObjectScanned:
+    m_PersistentCalls:
+      m_Calls: []
+  OnObjectDetectedHaptics:
+    m_PersistentCalls:
+      m_Calls: []
+  OnObjectLostHaptics:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &1491745278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1491745276}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ad374cad5f8a248ae80880e719f3a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scanner: {fileID: 292834152}
+  audioManager: {fileID: 1491745277}
+  autoFindComponents: 1
+--- !u!4 &1491745279
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1491745276}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -4.96012, y: 0.1, z: 0.27698}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1493106574
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -130309,6 +130534,7 @@ SceneRoots:
   - {fileID: 183094958}
   - {fileID: 704859385}
   - {fileID: 859010869}
+  - {fileID: 292834153}
   - {fileID: 868129778}
   - {fileID: 123800535}
   - {fileID: 1577388710}
@@ -130320,8 +130546,10 @@ SceneRoots:
   - {fileID: 1562897923}
   - {fileID: 1044929722}
   - {fileID: 611968543}
+  - {fileID: 1076089352}
   - {fileID: 1394746795}
   - {fileID: 1861699309}
+  - {fileID: 1491745279}
   - {fileID: 1149998500}
   - {fileID: 1863197349}
   - {fileID: 2026364799}
