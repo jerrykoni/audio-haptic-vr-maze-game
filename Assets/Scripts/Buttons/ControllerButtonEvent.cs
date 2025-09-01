@@ -42,4 +42,12 @@ public class ControllerButtonEvent : MonoBehaviour
             toggleState = !toggleState;
         }
     }
+
+    /// <summary>
+    /// Resets the toggle state to its default value (false).
+    /// </summary>
+    public void ResetToggle()
+    {
+        toggleState = false;
+    }
 }

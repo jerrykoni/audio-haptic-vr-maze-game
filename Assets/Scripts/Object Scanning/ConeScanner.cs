@@ -239,6 +239,17 @@ public class ConeScanner : MonoBehaviour
         axisOffset = Quaternion.Euler(coneRotation);
     }
 
+    void OnDisable()
+    {
+        // If we were tracking a target when we were disabled,
+        // fire the OnObjectLost event to notify all listeners (like the Haptics Manager)
+        // that they should stop their feedback loops for this object.
+        if (currentTarget != null)
+        {
+            OnObjectLost?.Invoke(currentTarget);
+        }
+    }
+
     #region Cone Generation
     void BuildVisualCone()
     {
