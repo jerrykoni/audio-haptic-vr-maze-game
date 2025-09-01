@@ -11233,6 +11233,7 @@ GameObject:
   - component: {fileID: 363667344}
   - component: {fileID: 363667343}
   - component: {fileID: 363667342}
+  - component: {fileID: 363667345}
   m_Layer: 6
   m_Name: ConeRangeTrigger
   m_TagString: Untagged
@@ -11290,6 +11291,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &363667345
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 363667341}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f578cea3431989e458f1ffe40c8db504, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scanner: {fileID: 292834152}
+  triggeredRange: 2
 --- !u!1 &363839580
 GameObject:
   m_ObjectHideFlags: 0
@@ -101258,6 +101273,7 @@ GameObject:
   - component: {fileID: 1891289922}
   - component: {fileID: 1891289921}
   - component: {fileID: 1891289920}
+  - component: {fileID: 1891289923}
   m_Layer: 6
   m_Name: ConeRangeTriggerReset
   m_TagString: Untagged
@@ -101315,6 +101331,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1891289923
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1891289919}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f578cea3431989e458f1ffe40c8db504, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scanner: {fileID: 292834152}
+  triggeredRange: 6
 --- !u!1001 &1892133601
 PrefabInstance:
   m_ObjectHideFlags: 0
