@@ -10204,6 +10204,16 @@ MonoBehaviour:
   headsetConeRotation: {x: 90, y: 0, z: 0}
   coneMaterial: {fileID: 2100000, guid: c9b1a79b9d91f3a4aa911aa115555c68, type: 2}
   headsetVisualStartOffset: 0.3
+  wallScrapeLoop: {fileID: 8300000, guid: 3865697e0cc61cf43a42951a22d573e8, type: 3}
+  scrapeMinAngularSpeed: 0
+  scrapeMaxAngularSpeed: 180
+  scrapeMaxVolume: 1
+  scrapeMinPitch: 1
+  scrapeMaxPitch: 1
+  scrapeFadeOutTime: 0.25
+  scrapeAudioAxisPosition: 1
+  suppressScrapeWhileTargetLocked: 1
+  angularSpeedSmoothing: 10
 --- !u!4 &292834153
 Transform:
   m_ObjectHideFlags: 0
@@ -38513,6 +38523,16 @@ MonoBehaviour:
   headsetConeRotation: {x: 90, y: 0, z: 0}
   coneMaterial: {fileID: 2100000, guid: c9b1a79b9d91f3a4aa911aa115555c68, type: 2}
   headsetVisualStartOffset: 0.3
+  wallScrapeLoop: {fileID: 8300000, guid: 3865697e0cc61cf43a42951a22d573e8, type: 3}
+  scrapeMinAngularSpeed: 0
+  scrapeMaxAngularSpeed: 180
+  scrapeMaxVolume: 1
+  scrapeMinPitch: 1
+  scrapeMaxPitch: 1
+  scrapeFadeOutTime: 0.25
+  scrapeAudioAxisPosition: 1
+  suppressScrapeWhileTargetLocked: 1
+  angularSpeedSmoothing: 10
 --- !u!4 &859010869
 Transform:
   m_ObjectHideFlags: 0

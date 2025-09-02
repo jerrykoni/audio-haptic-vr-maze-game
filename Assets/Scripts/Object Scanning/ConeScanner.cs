@@ -10,7 +10,6 @@ public class ConeScanner : MonoBehaviour
     [Tooltip("Headset camera or head anchor transform.")]
     public Transform headsetTransform;
 
-
     [Header("Cone Settings")]
     [Range(1f, 89f)] public float scanAngle = 30f;
     public float scanRange = 10f;
@@ -31,14 +30,32 @@ public class ConeScanner : MonoBehaviour
     [Tooltip("How far from the anchor to start drawing the cone when attached to the headset. This 'cuts' the tip off visually.")]
     public float headsetVisualStartOffset = 0.5f;
 
-    // Fires when we gain a new closest object
+    // Scrape Audio (Angular Velocity-Based)
+    [Header("Wall Scrape Audio (Angular)")]
+    [Tooltip("Looping scrape/scratch clip.")]
+    public AudioClip wallScrapeLoop;
+    [Tooltip("Min angular speed (deg/sec) required before scrape starts.")]
+    public float scrapeMinAngularSpeed = 20f;
+    [Tooltip("Angular speed (deg/sec) that maps to max volume/pitch.")]
+    public float scrapeMaxAngularSpeed = 180f;
+    [Tooltip("Volume at min -> 0; at max -> scrapeMaxVolume.")]
+    public float scrapeMaxVolume = 0.8f;
+    [Tooltip("Pitch at min angular speed.")]
+    public float scrapeMinPitch = 0.85f;
+    [Tooltip("Pitch at max angular speed.")]
+    public float scrapeMaxPitch = 1.25f;
+    [Tooltip("Seconds to fade out after contact / angular speed lost.")]
+    public float scrapeFadeOutTime = 0.25f;
+    [Tooltip("Normalized (0 = apex, 1 = far end) axis position for scrape audio child.")]
+    [Range(0f, 1f)] public float scrapeAudioAxisPosition = 1f;
+    [Tooltip("If true, wall scrape audio is muted while a scannable target is currently detected.")]
+    public bool suppressScrapeWhileTargetLocked = true;
+
+    // Events
     public event Action<GameObject> OnObjectDetected;
-    // Fires when the cone stops overlapping the previously detected object
     public event Action<GameObject> OnObjectLost;
-    // Fires continuously with the current target and its distance
     public event Action<GameObject, float> OnObjectUpdated;
 
-    //Expose the private currentTarget variable
     public GameObject CurrentTarget => currentTarget;
 
     private GameObject visualGO;
@@ -49,8 +66,23 @@ public class ConeScanner : MonoBehaviour
     private GameObject currentTarget;
     private Quaternion axisOffset = Quaternion.identity;
     private Vector3 defaultConeRotation;
-    private Transform defaultAttachPoint;      // remembers the controller
-    private bool isAttachedToHeadset = false;  // current state
+    private Transform defaultAttachPoint;
+    private bool isAttachedToHeadset = false;
+
+    // Scrape runtime state
+    private AudioSource scrapeAudio;
+    private Transform scrapeAudioTransform;
+    private int wallContacts = 0;
+    private float targetScrapeVolume = 0f;
+
+    // Angular velocity tracking
+    private Quaternion lastRot;
+    private float smoothedAngularSpeed;
+    [Tooltip("Exponential smoothing factor for angular speed (0 = none, higher = faster response).")]
+    public float angularSpeedSmoothing = 10f;
+
+    // Effective length for reference (physics cone)
+    private float currentConeLength = 0f;
 
     void Awake()
     {
@@ -59,85 +91,115 @@ public class ConeScanner : MonoBehaviour
         if (headsetTransform == null)
             Debug.LogError("Headset Transform not assigned!", this);
 
-        // Remember initial values 
         defaultAttachPoint = attachPoint;
         defaultConeRotation = coneRotation;
 
         axisOffset = Quaternion.Euler(coneRotation);
         BuildVisualCone();
         BuildPhysicsCone();
+
+        lastRot = attachPoint != null ? (attachPoint.rotation * axisOffset) : transform.rotation;
+
+        if (wallScrapeLoop != null)
+        {
+            var audioChild = new GameObject("ScrapeAudio");
+            audioChild.transform.SetParent(physGO.transform, false);
+            scrapeAudioTransform = audioChild.transform;
+            scrapeAudioTransform.localPosition = new Vector3(0f, scrapeAudioAxisPosition, 0f);
+            scrapeAudio = audioChild.AddComponent<AudioSource>();
+            scrapeAudio.clip = wallScrapeLoop;
+            scrapeAudio.loop = true;
+            scrapeAudio.playOnAwake = false;
+            scrapeAudio.spatialBlend = 1f;
+            scrapeAudio.volume = 0f;
+        }
     }
 
     void Update()
     {
         if (attachPoint == null) return;
 
-        // Base rotation is always set first
         Quaternion baseRotation = attachPoint.rotation * axisOffset;
 
-        // --- Visual Cone Logic ---
         if (visualGO != null)
         {
-            // Set position and rotation from attach point
             visualGO.transform.SetPositionAndRotation(attachPoint.position, baseRotation);
 
-            // Determine the cone's full length based on raycast hits
             float effRange = GetEffectiveRange();
 
-            // If attached to headset, apply the visual offset
             if (isAttachedToHeadset)
             {
-                // The direction the cone's tip points (its local Y-axis)
                 Vector3 coneForward = visualGO.transform.up;
-
-                // Move the cone's pivot forward by the offset amount
                 visualGO.transform.position += coneForward * headsetVisualStartOffset;
-
-                // Shorten the cone's length by the same amount so the base stays in place
                 float visualLength = Mathf.Max(0, effRange - headsetVisualStartOffset);
                 ScaleCone(visualGO.transform, visualLength);
             }
             else
             {
-                // If not on headset, scale normally
                 ScaleCone(visualGO.transform, effRange);
             }
         }
     }
 
-
     void FixedUpdate()
     {
         if (attachPoint == null) return;
 
-        // --- Physics Cone Logic (remains unchanged) ---
-        physGO.transform.SetPositionAndRotation(
-            attachPoint.position,
-            attachPoint.rotation * axisOffset);
+        Quaternion currentRot = attachPoint.rotation * axisOffset;
+        physGO.transform.SetPositionAndRotation(attachPoint.position, currentRot);
 
         float effRange = GetEffectiveRange();
+        currentConeLength = effRange;
         ScaleCone(physGO.transform, effRange);
 
+        Quaternion delta = currentRot * Quaternion.Inverse(lastRot);
+        delta.ToAngleAxis(out float deltaAngleDeg, out _);
+        if (deltaAngleDeg > 180f) deltaAngleDeg = 360f - deltaAngleDeg;
+        float angularSpeedDegPerSec = deltaAngleDeg / Time.fixedDeltaTime;
+
+        float lerpFactor = 1f - Mathf.Exp(-angularSpeedSmoothing * Time.fixedDeltaTime);
+        smoothedAngularSpeed = Mathf.Lerp(smoothedAngularSpeed, angularSpeedDegPerSec, lerpFactor);
+
         UpdateBestTarget();
+        UpdateScrapeAudioFromAngular(smoothedAngularSpeed);
+
+        if (scrapeAudioTransform != null)
+            scrapeAudioTransform.localPosition = new Vector3(0f, Mathf.Clamp01(scrapeAudioAxisPosition), 0f);
+
+        lastRot = currentRot;
     }
 
+    #region Trigger Handling
     public void HandleTriggerEnter(Collider other)
     {
+        if (IsObstacle(other.gameObject))
+            wallContacts++;
+
         if (IsValid(other.gameObject))
-        {
             candidates.Add(other.gameObject);
-        }
     }
 
     public void HandleTriggerExit(Collider other)
     {
+        if (IsObstacle(other.gameObject))
+            wallContacts = Mathf.Max(0, wallContacts - 1);
+
         candidates.Remove(other.gameObject);
     }
+
+    public void HandleTriggerStay(Collider other) { }
+    #endregion
 
     bool IsValid(GameObject go)
     {
         int bit = 1 << go.layer;
         return (scannableLayer.value & bit) != 0;
+    }
+
+    bool IsObstacle(GameObject go)
+    {
+        int bit = 1 << go.layer;
+        return (obstacleMask.value & bit) != 0;
     }
 
     void UpdateBestTarget()
@@ -165,20 +227,16 @@ public class ConeScanner : MonoBehaviour
         if (best != currentTarget)
         {
             if (currentTarget != null)
-            {
                 OnObjectLost?.Invoke(currentTarget);
-            }
+
             currentTarget = best;
+
             if (currentTarget != null)
-            {
                 OnObjectDetected?.Invoke(currentTarget);
-            }
         }
 
         if (currentTarget != null)
-        {
             OnObjectUpdated?.Invoke(currentTarget, Mathf.Sqrt(bestDistSqr));
-        }
     }
 
     float GetEffectiveRange()
@@ -208,21 +266,16 @@ public class ConeScanner : MonoBehaviour
         int hitCount = Physics.OverlapSphereNonAlloc(
             origin,
             0.01f,
-            _obstacleCheckCache, // Use our cached array
+            _obstacleCheckCache,
             obstacleMask,
             QueryTriggerInteraction.Ignore
         );
-
         return hitCount > 0;
     }
 
-
-    /// <summary>
-    /// Call this (e.g. via your button event) to flip between controller & headset.
-    /// </summary>
     public void ToggleAttachment()
     {
-        isAttachedToHeadset = !isAttachedToHeadset; // Invert the state
+        isAttachedToHeadset = !isAttachedToHeadset;
 
         if (isAttachedToHeadset)
         {
@@ -235,20 +288,75 @@ public class ConeScanner : MonoBehaviour
             coneRotation = defaultConeRotation;
         }
 
-        // Update the rotation offset for the new attachment
         axisOffset = Quaternion.Euler(coneRotation);
+        lastRot = attachPoint.rotation * axisOffset;
     }
 
     void OnDisable()
     {
-        // If we were tracking a target when we were disabled,
-        // fire the OnObjectLost event to notify all listeners (like the Haptics Manager)
-        // that they should stop their feedback loops for this object.
         if (currentTarget != null)
-        {
             OnObjectLost?.Invoke(currentTarget);
+        if (scrapeAudio != null && scrapeAudio.isPlaying)
+            scrapeAudio.Stop();
+    }
+
+    #region Scrape Audio (Angular)
+    void UpdateScrapeAudioFromAngular(float angularSpeedDegPerSec)
+    {
+        if (scrapeAudio == null || wallScrapeLoop == null)
+            return;
+
+        // Suppress while target locked if enabled
+        if (suppressScrapeWhileTargetLocked && currentTarget != null)
+        {
+            FadeOutScrape();
+            return;
+        }
+
+        bool shouldScrape = wallContacts > 0 && angularSpeedDegPerSec >= scrapeMinAngularSpeed;
+
+        if (shouldScrape)
+        {
+            float t = Mathf.InverseLerp(scrapeMinAngularSpeed, scrapeMaxAngularSpeed, angularSpeedDegPerSec);
+            targetScrapeVolume = scrapeMaxVolume * t;
+            float targetPitch = Mathf.Lerp(scrapeMinPitch, scrapeMaxPitch, t);
+
+            if (!scrapeAudio.isPlaying)
+            {
+                scrapeAudio.volume = 0f;
+                scrapeAudio.Play();
+            }
+
+            scrapeAudio.volume = Mathf.MoveTowards(
+                scrapeAudio.volume,
+                targetScrapeVolume,
+                Time.fixedDeltaTime * (scrapeMaxVolume / 0.1f));
+
+            scrapeAudio.pitch = Mathf.MoveTowards(
+                scrapeAudio.pitch,
+                targetPitch,
+                Time.fixedDeltaTime * 5f);
+        }
+        else
+        {
+            FadeOutScrape();
         }
     }
+
+    void FadeOutScrape()
+    {
+        if (scrapeAudio == null || !scrapeAudio.isPlaying) return;
+
+        float fadeDelta = (scrapeMaxVolume / Mathf.Max(0.01f, scrapeFadeOutTime)) * Time.fixedDeltaTime;
+        scrapeAudio.volume = Mathf.Max(0f, scrapeAudio.volume - fadeDelta);
+        if (scrapeAudio.volume <= 0.0001f)
+        {
+            scrapeAudio.Stop();
+            scrapeAudio.volume = 0f;
+        }
+        targetScrapeVolume = 0f;
+    }
+    #endregion
 
     #region Cone Generation
     void BuildVisualCone()
@@ -294,7 +402,6 @@ public class ConeScanner : MonoBehaviour
     void ScaleCone(Transform t, float range)
     {
         float radius = Mathf.Tan(scanAngle * Mathf.Deg2Rad) * range;
-        // Y‐axis of your unit cone is its length
         t.localScale = new Vector3(radius, range, radius);
     }
 

@@ -10,4 +10,8 @@ public class TriggerRelay : MonoBehaviour
 
     void OnTriggerExit(Collider other)
         => scanner.HandleTriggerExit(other);
+
+    // (Optional) If later you want per-frame proximity updates, this is ready.
+    void OnTriggerStay(Collider other)
+        => scanner.HandleTriggerStay(other);
 }
