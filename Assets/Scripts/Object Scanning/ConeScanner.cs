@@ -32,6 +32,8 @@ public class ConeScanner : MonoBehaviour
 
     // Scrape Audio (Angular Velocity-Based)
     [Header("Wall Scrape Audio (Angular)")]
+    [Tooltip("Master switch: completely enable/disable wall scrape system.")]
+    public bool enableScrapeAudio = true;
     [Tooltip("Looping scrape/scratch clip.")]
     public AudioClip wallScrapeLoop;
     [Tooltip("Min angular speed (deg/sec) required before scrape starts.")]
@@ -100,20 +102,17 @@ public class ConeScanner : MonoBehaviour
 
         lastRot = attachPoint != null ? (attachPoint.rotation * axisOffset) : transform.rotation;
 
-        if (wallScrapeLoop != null)
-        {
-            var audioChild = new GameObject("ScrapeAudio");
-            audioChild.transform.SetParent(physGO.transform, false);
-            scrapeAudioTransform = audioChild.transform;
-            scrapeAudioTransform.localPosition = new Vector3(0f, scrapeAudioAxisPosition, 0f);
-            scrapeAudio = audioChild.AddComponent<AudioSource>();
-            scrapeAudio.clip = wallScrapeLoop;
-            scrapeAudio.loop = true;
-            scrapeAudio.playOnAwake = false;
-            scrapeAudio.spatialBlend = 1f;
-            scrapeAudio.volume = 0f;
-        }
+        EnsureScrapeAudio(); // creates audio child only if enabled
     }
+
+#if UNITY_EDITOR
+    void OnValidate()
+    {
+        // Allow toggling in editor at runtime or edit mode
+        if (Application.isPlaying)
+            EnsureScrapeAudio();
+    }
+#endif
 
     void Update()
     {
@@ -161,9 +160,11 @@ public class ConeScanner : MonoBehaviour
         smoothedAngularSpeed = Mathf.Lerp(smoothedAngularSpeed, angularSpeedDegPerSec, lerpFactor);
 
         UpdateBestTarget();
-        UpdateScrapeAudioFromAngular(smoothedAngularSpeed);
 
-        if (scrapeAudioTransform != null)
+        if (enableScrapeAudio)
+            UpdateScrapeAudioFromAngular(smoothedAngularSpeed);
+
+        if (enableScrapeAudio && scrapeAudioTransform != null)
             scrapeAudioTransform.localPosition = new Vector3(0f, Mathf.Clamp01(scrapeAudioAxisPosition), 0f);
 
         lastRot = currentRot;
@@ -303,10 +304,10 @@ public class ConeScanner : MonoBehaviour
     #region Scrape Audio (Angular)
     void UpdateScrapeAudioFromAngular(float angularSpeedDegPerSec)
     {
+        if (!enableScrapeAudio) return;
         if (scrapeAudio == null || wallScrapeLoop == null)
             return;
 
-        // Suppress while target locked if enabled
         if (suppressScrapeWhileTargetLocked && currentTarget != null)
         {
             FadeOutScrape();
@@ -355,6 +356,47 @@ public class ConeScanner : MonoBehaviour
             scrapeAudio.volume = 0f;
         }
         targetScrapeVolume = 0f;
+    }
+    #endregion
+
+    #region Scrape Audio Enable/Disable
+    void EnsureScrapeAudio()
+    {
+        if (!enableScrapeAudio)
+        {
+            // Tear down if exists
+            if (scrapeAudioTransform != null)
+            {
+                if (scrapeAudio != null && scrapeAudio.isPlaying)
+                    scrapeAudio.Stop();
+                Destroy(scrapeAudioTransform.gameObject);
+            }
+            scrapeAudio = null;
+            scrapeAudioTransform = null;
+            return;
+        }
+
+        // Create if enabled and not present
+        if (scrapeAudio == null && wallScrapeLoop != null && physGO != null)
+        {
+            var audioChild = new GameObject("ScrapeAudio");
+            audioChild.transform.SetParent(physGO.transform, false);
+            scrapeAudioTransform = audioChild.transform;
+            scrapeAudioTransform.localPosition = new Vector3(0f, Mathf.Clamp01(scrapeAudioAxisPosition), 0f);
+            scrapeAudio = audioChild.AddComponent<AudioSource>();
+            scrapeAudio.clip = wallScrapeLoop;
+            scrapeAudio.loop = true;
+            scrapeAudio.playOnAwake = false;
+            scrapeAudio.spatialBlend = 1f;
+            scrapeAudio.volume = 0f;
+        }
+    }
+
+    public void SetScrapeEnabled(bool enabled)
+    {
+        if (enableScrapeAudio == enabled) return;
+        enableScrapeAudio = enabled;
+        EnsureScrapeAudio();
     }
     #endregion
 
