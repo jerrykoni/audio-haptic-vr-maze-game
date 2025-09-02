@@ -83,8 +83,11 @@ public class ConeScanner : MonoBehaviour
     [Tooltip("Exponential smoothing factor for angular speed (0 = none, higher = faster response).")]
     public float angularSpeedSmoothing = 10f;
 
-    // Effective length for reference (physics cone)
+    // Effective length (physics cone)
     private float currentConeLength = 0f;
+
+    // NEW: Track obstacle overlaps explicitly (so we can rebuild after re-enable)
+    private readonly HashSet<Collider> obstacleOverlapCols = new();
 
     void Awake()
     {
@@ -102,13 +105,21 @@ public class ConeScanner : MonoBehaviour
 
         lastRot = attachPoint != null ? (attachPoint.rotation * axisOffset) : transform.rotation;
 
-        EnsureScrapeAudio(); // creates audio child only if enabled
+        EnsureScrapeAudio();
+    }
+
+    // NEW: Re-acquire overlaps when re-enabled (handles being inside objects)
+    void OnEnable()
+    {
+        if (physGO != null && attachPoint != null)
+        {
+            ReacquireOverlaps();
+        }
     }
 
 #if UNITY_EDITOR
     void OnValidate()
     {
-        // Allow toggling in editor at runtime or edit mode
         if (Application.isPlaying)
             EnsureScrapeAudio();
     }
@@ -174,7 +185,10 @@ public class ConeScanner : MonoBehaviour
     public void HandleTriggerEnter(Collider other)
     {
         if (IsObstacle(other.gameObject))
-            wallContacts++;
+        {
+            if (obstacleOverlapCols.Add(other))
+                wallContacts = obstacleOverlapCols.Count;
+        }
 
         if (IsValid(other.gameObject))
             candidates.Add(other.gameObject);
@@ -183,7 +197,10 @@ public class ConeScanner : MonoBehaviour
     public void HandleTriggerExit(Collider other)
     {
         if (IsObstacle(other.gameObject))
-            wallContacts = Mathf.Max(0, wallContacts - 1);
+        {
+            if (obstacleOverlapCols.Remove(other))
+                wallContacts = obstacleOverlapCols.Count;
+        }
 
         candidates.Remove(other.gameObject);
     }
@@ -295,8 +312,16 @@ public class ConeScanner : MonoBehaviour
 
     void OnDisable()
     {
+        // Fire lost if needed
         if (currentTarget != null)
             OnObjectLost?.Invoke(currentTarget);
+
+        // CHANGED: Reset internal sets so we don't carry stale overlaps
+        currentTarget = null;
+        candidates.Clear();
+        obstacleOverlapCols.Clear();
+        wallContacts = 0;
+
         if (scrapeAudio != null && scrapeAudio.isPlaying)
             scrapeAudio.Stop();
     }
@@ -364,7 +389,6 @@ public class ConeScanner : MonoBehaviour
     {
         if (!enableScrapeAudio)
         {
-            // Tear down if exists
             if (scrapeAudioTransform != null)
             {
                 if (scrapeAudio != null && scrapeAudio.isPlaying)
@@ -376,7 +400,6 @@ public class ConeScanner : MonoBehaviour
             return;
         }
 
-        // Create if enabled and not present
         if (scrapeAudio == null && wallScrapeLoop != null && physGO != null)
         {
             var audioChild = new GameObject("ScrapeAudio");
@@ -397,6 +420,56 @@ public class ConeScanner : MonoBehaviour
         if (enableScrapeAudio == enabled) return;
         enableScrapeAudio = enabled;
         EnsureScrapeAudio();
+        if (enabled)
+            ReacquireOverlaps();
+    }
+    #endregion
+
+    #region Reacquire Overlaps (NEW)
+    void ReacquireOverlaps()
+    {
+        candidates.Clear();
+        obstacleOverlapCols.Clear();
+        wallContacts = 0;
+        currentTarget = null;
+
+        if (physGO == null) return;
+
+        Vector3 apex = physGO.transform.position;
+        Vector3 axisDir = (attachPoint.rotation * axisOffset * Vector3.up).normalized;
+
+        // Combine masks (scannable + obstacles)
+        int mask = scannableLayer.value | obstacleMask.value;
+
+        // Broad phase sphere
+        Collider[] hits = Physics.OverlapSphere(apex, scanRange, mask, QueryTriggerInteraction.Collide);
+
+        foreach (var col in hits)
+        {
+            if (col == null) continue;
+            GameObject go = col.gameObject;
+
+            Vector3 center = col.bounds.center;
+            Vector3 toCenter = center - apex;
+            float dist = toCenter.magnitude;
+            if (dist <= 0.0001f) continue;
+            if (dist > scanRange) continue;
+
+            float ang = Vector3.Angle(axisDir, toCenter);
+            if (ang > scanAngle + 0.5f) continue; // small tolerance
+
+            if (IsObstacle(go))
+            {
+                if (obstacleOverlapCols.Add(col))
+                    wallContacts = obstacleOverlapCols.Count;
+            }
+
+            if (IsValid(go))
+                candidates.Add(go);
+        }
+
+        // Immediately evaluate best target so events fire right away
+        UpdateBestTarget();
     }
     #endregion
 
