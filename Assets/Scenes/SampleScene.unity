@@ -89477,6 +89477,119 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 628581175}
   m_SourcePrefab: {fileID: 100100000, guid: 42471d84493492140af70847f296bd30, type: 3}
+--- !u!1 &1771142215
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1771142218}
+  - component: {fileID: 1771142217}
+  - component: {fileID: 1771142216}
+  m_Layer: 0
+  m_Name: VRBlackoutManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1771142216
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1771142215}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68b578e7524db8d4fad53828c2c4bc08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  button: 2
+  controller: 2
+  onButtonDown:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1149998499}
+        m_TargetAssemblyTypeName: UnityEngine.AudioSource, UnityEngine
+        m_MethodName: Play
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onToggleOn:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1771142217}
+        m_TargetAssemblyTypeName: VRBlackoutManager, Assembly-CSharp
+        m_MethodName: ToggleBlackout
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onToggleOff:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1771142217}
+        m_TargetAssemblyTypeName: VRBlackoutManager, Assembly-CSharp
+        m_MethodName: ToggleBlackout
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &1771142217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1771142215}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0ed244ad1b4c7c49b902b9d8e0c30f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rigRoot: {fileID: 42461284}
+  targetCameras: []
+  startBlack: 1
+  useFade: 1
+  fadeDuration: 0.25
+  blackoutColor: {r: 0, g: 0, b: 0, a: 1}
+  quadScale: 5
+  quadDistance: 0.15
+  zeroCullingAfterFade: 1
+--- !u!4 &1771142218
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1771142215}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: -7.5, y: 0.15, z: 1.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1771909743 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4508159367567424553, guid: 73f70af9d9a62974c825d662f67408cd, type: 3}
@@ -130796,6 +130909,7 @@ SceneRoots:
   - {fileID: 1882833488}
   - {fileID: 183094958}
   - {fileID: 1054614242}
+  - {fileID: 1771142218}
   - {fileID: 704859385}
   - {fileID: 859010869}
   - {fileID: 292834153}
