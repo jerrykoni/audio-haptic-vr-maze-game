@@ -34826,15 +34826,18 @@ MonoBehaviour:
   rightConeScanner: {fileID: 859010868}
   leftAudioManager: {fileID: 1491745277}
   rightAudioManager: {fileID: 1861699308}
-  detectionRadius: 0.3
-  maxHapticDistance: 0.3
+  detectionRadius: 0.15
+  maxHapticDistance: 0.15
   hapticCheckInterval: 0.1
   wallHapticFrequency: 0.1
-  maxWallHapticIntensity: 0.83
-  wallHapticSmoothingSpeed: 20
   wallLayer:
     serializedVersion: 2
     m_Bits: 128
+  wallMaxIntensity: 0.65
+  wallIntensityRampExponent: 3
+  wallHapticRiseTime: 0.3
+  wallHapticFallTime: 0.3
+  wallHapticsMinCutoff: 0
   scanPulseFrequency: 0.5
   scanPulseIntensity: 0.8
   scanPulseDuration: 0.02
@@ -61675,11 +61678,14 @@ MonoBehaviour:
   maxHapticDistance: 0.5
   hapticCheckInterval: 0.1
   wallHapticFrequency: 0.1
-  maxWallHapticIntensity: 1
-  wallHapticSmoothingSpeed: 12
   wallLayer:
     serializedVersion: 2
     m_Bits: 128
+  wallMaxIntensity: 1
+  wallIntensityRampExponent: 2
+  wallHapticRiseTime: 0.3
+  wallHapticFallTime: 0.12
+  wallHapticsMinCutoff: 0.01
   scanPulseFrequency: 0.5
   scanPulseIntensity: 0.8
   scanPulseDuration: 0.02

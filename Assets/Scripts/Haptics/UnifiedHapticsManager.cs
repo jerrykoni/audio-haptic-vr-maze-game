@@ -24,10 +24,22 @@ public class UnifiedHapticsManager : MonoBehaviour
 
     [Header("Wall Haptics Settings")]
     public float detectionRadius = 0.5f;
+    [Tooltip("Distance (from hand to wall surface) over which intensity ramps from 0 to full.")]
     public float maxHapticDistance = 0.5f;
     public float hapticCheckInterval = 0.1f;
     public float wallHapticFrequency = 0.1f;
     public LayerMask wallLayer;
+    [Space(6)]
+    [Tooltip("Maximum vibration intensity when fully 'penetrated' (after easing).")]
+    [Range(0f, 1f)] public float wallMaxIntensity = 1f;
+    [Tooltip("Easing exponent. 1 = linear. >1 slows early growth (ease-in). <1 speeds early growth.")]
+    [Min(0.01f)] public float wallIntensityRampExponent = 2f;
+    [Tooltip("Seconds to go from 0 to max when entering a wall (after exponent applied).")]
+    [Min(0.01f)] public float wallHapticRiseTime = 0.3f;
+    [Tooltip("Seconds to fade back to 0 after leaving a wall.")]
+    [Min(0.01f)] public float wallHapticFallTime = 0.12f;
+    [Tooltip("If true, intensity is forced to 0 when below this threshold.")]
+    public float wallHapticsMinCutoff = 0.01f;
 
     [Header("Scanning Haptics Settings")]
     public float scanPulseFrequency = 0.5f;
@@ -53,6 +65,10 @@ public class UnifiedHapticsManager : MonoBehaviour
     private Coroutine _wallHapticsCoroutine;
     private bool _leftWallHapticsActive = false;
     private bool _rightWallHapticsActive = false;
+
+    // Cached (smoothed) wall intensities per hand
+    private float _leftWallIntensity = 0f;
+    private float _rightWallIntensity = 0f;
 
     // A pre-allocated array for physics queries to avoid generating garbage memory.
     private readonly Collider[] _nearbyWallsCache = new Collider[16];
@@ -261,14 +277,14 @@ public class UnifiedHapticsManager : MonoBehaviour
         WaitForSeconds wait = new(hapticCheckInterval);
         while (true)
         {
-            _leftWallHapticsActive = ProcessHandHaptics(leftHandAnchor, OVRInput.Controller.LTouch);
-            _rightWallHapticsActive = ProcessHandHaptics(rightHandAnchor, OVRInput.Controller.RTouch);
+            _leftWallHapticsActive = ProcessHandHaptics(leftHandAnchor, OVRInput.Controller.LTouch, ref _leftWallIntensity);
+            _rightWallHapticsActive = ProcessHandHaptics(rightHandAnchor, OVRInput.Controller.RTouch, ref _rightWallIntensity);
             yield return wait;
         }
     }
 
-    // --- CRITICAL FIX IS HERE ---
-    bool ProcessHandHaptics(Transform handAnchor, OVRInput.Controller controller)
+    // Modified: Added smoothing + adjustable max + easing exponent.
+    bool ProcessHandHaptics(Transform handAnchor, OVRInput.Controller controller, ref float currentSmoothedIntensity)
     {
         if (handAnchor == null) return false;
 
@@ -276,24 +292,59 @@ public class UnifiedHapticsManager : MonoBehaviour
 
         if (numColliders > 0)
         {
-            // A wall is detected. Set vibration based on distance.
-            float minDistance = _nearbyWallsCache.Take(numColliders).Select(c => Vector3.Distance(c.ClosestPoint(handAnchor.position), handAnchor.position)).Min();
-            float intensity = Mathf.Clamp01(1f - (minDistance / maxHapticDistance));
-            OVRInput.SetControllerVibration(wallHapticFrequency, intensity, controller);
-            return true; // Report that wall haptics are active.
+            // Distance to closest wall surface
+            float minDistance = _nearbyWallsCache
+                .Take(numColliders)
+                .Select(c => Vector3.Distance(c.ClosestPoint(handAnchor.position), handAnchor.position))
+                .Min();
+
+            // Normalize (0 = touching / inside, 1 = at or beyond maxHapticDistance)
+            float normalized = Mathf.Clamp01(1f - (minDistance / Mathf.Max(0.0001f, maxHapticDistance)));
+
+            // Ease-in / shaping
+            if (wallIntensityRampExponent != 1f)
+                normalized = Mathf.Pow(normalized, wallIntensityRampExponent);
+
+            float targetIntensity = wallMaxIntensity * normalized;
+
+            // Time-based smoothing: different rise/fall speeds
+            float timeConstant = (targetIntensity > currentSmoothedIntensity) ? wallHapticRiseTime : wallHapticFallTime;
+            float maxDelta = (wallMaxIntensity * hapticCheckInterval) / Mathf.Max(0.0001f, timeConstant);
+            currentSmoothedIntensity = Mathf.MoveTowards(currentSmoothedIntensity, targetIntensity, maxDelta);
+
+            // Cutoff small residuals
+            if (currentSmoothedIntensity < wallHapticsMinCutoff)
+                currentSmoothedIntensity = 0f;
+
+            OVRInput.SetControllerVibration(wallHapticFrequency, currentSmoothedIntensity, controller);
+            return currentSmoothedIntensity > 0f;
         }
         else
         {
-            // No wall is detected. We must stop the vibration, but only if scan haptics are not active.
-            bool isThisHandScanning = (controller == OVRInput.Controller.LTouch && leftConeScanner.CurrentTarget != null) ||
-                                      (controller == OVRInput.Controller.RTouch && rightConeScanner.CurrentTarget != null);
+            // No wall; decay toward 0
+            if (currentSmoothedIntensity > 0f)
+            {
+                float maxDelta = (wallMaxIntensity * hapticCheckInterval) / Mathf.Max(0.0001f, wallHapticFallTime);
+                currentSmoothedIntensity = Mathf.MoveTowards(currentSmoothedIntensity, 0f, maxDelta);
+                if (currentSmoothedIntensity < wallHapticsMinCutoff)
+                    currentSmoothedIntensity = 0f;
+
+                if (currentSmoothedIntensity > 0f)
+                {
+                    OVRInput.SetControllerVibration(wallHapticFrequency, currentSmoothedIntensity, controller);
+                    return true;
+                }
+            }
+
+            bool isThisHandScanning =
+                (controller == OVRInput.Controller.LTouch && leftConeScanner != null && leftConeScanner.CurrentTarget != null) ||
+                (controller == OVRInput.Controller.RTouch && rightConeScanner != null && rightConeScanner.CurrentTarget != null);
 
             if (!isThisHandScanning)
             {
-                // If this hand is idle (not near a wall AND not scanning), turn off its vibration.
                 OVRInput.SetControllerVibration(0, 0, controller);
             }
-            return false; // Report that wall haptics are inactive.
+            return false;
         }
     }
 
