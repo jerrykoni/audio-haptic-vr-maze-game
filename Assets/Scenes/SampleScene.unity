@@ -10228,7 +10228,7 @@ MonoBehaviour:
   headsetConeRotation: {x: 90, y: 0, z: 0}
   coneMaterial: {fileID: 2100000, guid: c9b1a79b9d91f3a4aa911aa115555c68, type: 2}
   headsetVisualStartOffset: 0.3
-  enableScrapeAudio: 1
+  enableScrapeAudio: 0
   wallScrapeLoop: {fileID: 8300000, guid: 3c71adb68ea7c23428dab521b72b1373, type: 3}
   scrapeMinAngularSpeed: 0
   scrapeMaxAngularSpeed: 180
@@ -23213,9 +23213,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 487254, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 351828911}
-    - targetCorrespondingSourceObject: {fileID: 487254, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1445882825}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 100006, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
       insertIndex: -1
@@ -34556,6 +34553,70 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 3.6
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &604571672
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 604571674}
+  - component: {fileID: 604571675}
+  m_Layer: 0
+  m_Name: WallScrapeManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &604571674
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 604571672}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &604571675
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 604571672}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90645bf3948249c419b1a87041a1a2b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  leftController: {fileID: 1939473583}
+  rightController: {fileID: 1266988950}
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  detectionRadius: 0.15
+  minScrapeVelocity: 0
+  maxScrapeVelocity: 1.4
+  scrapeLoopClip: {fileID: 8300000, guid: 3c71adb68ea7c23428dab521b72b1373, type: 3}
+  maxVolume: 0.35
+  minPitch: 1.2
+  maxPitch: 1.2
+  fadeInTime: 0.15
+  fadeOutTime: 0.25
+  proximityVolumeWeight: 1
+  velocitySmoothing: 17
+  proximitySmoothing: 17
+  drawGizmos: 1
+  leftColor: {r: 0.2, g: 0.6, b: 1, a: 0.35}
+  rightColor: {r: 1, g: 0.4, b: 0.2, a: 0.35}
 --- !u!114 &606619250 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3787502986299242031, guid: 679d44a7043d0a34680f36a3042bf7b1, type: 3}
@@ -34765,10 +34826,12 @@ MonoBehaviour:
   rightConeScanner: {fileID: 859010868}
   leftAudioManager: {fileID: 1491745277}
   rightAudioManager: {fileID: 1861699308}
-  detectionRadius: 0.5
-  maxHapticDistance: 0.5
+  detectionRadius: 0.3
+  maxHapticDistance: 0.3
   hapticCheckInterval: 0.1
   wallHapticFrequency: 0.1
+  maxWallHapticIntensity: 0.83
+  wallHapticSmoothingSpeed: 20
   wallLayer:
     serializedVersion: 2
     m_Bits: 128
@@ -38548,7 +38611,7 @@ MonoBehaviour:
   headsetConeRotation: {x: 90, y: 0, z: 0}
   coneMaterial: {fileID: 2100000, guid: c9b1a79b9d91f3a4aa911aa115555c68, type: 2}
   headsetVisualStartOffset: 0.3
-  enableScrapeAudio: 1
+  enableScrapeAudio: 0
   wallScrapeLoop: {fileID: 8300000, guid: 3c71adb68ea7c23428dab521b72b1373, type: 3}
   scrapeMinAngularSpeed: 0
   scrapeMaxAngularSpeed: 180
@@ -61612,6 +61675,8 @@ MonoBehaviour:
   maxHapticDistance: 0.5
   hapticCheckInterval: 0.1
   wallHapticFrequency: 0.1
+  maxWallHapticIntensity: 1
+  wallHapticSmoothingSpeed: 12
   wallLayer:
     serializedVersion: 2
     m_Bits: 128
@@ -80288,70 +80353,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4508159367567424553, guid: 73f70af9d9a62974c825d662f67408cd, type: 3}
   m_PrefabInstance: {fileID: 487172760}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1445882823
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1445882825}
-  - component: {fileID: 1445882826}
-  m_Layer: 0
-  m_Name: RightHandScanner
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &1445882825
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1445882823}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1266988950}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1445882826
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1445882823}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 78363ce405014ac42bc44fc523e4db4d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  coneRange: 6
-  coneAngle: 15
-  targetLayers:
-    serializedVersion: 2
-    m_Bits: 256
-  targetTags:
-  - Scannable
-  scanInterval: 0.1
-  maxObjectsToCheck: 50
-  useColliderBasedDetection: 1
-  colliderDistanceTolerance: 0.1
-  showDebugVisualization: 1
-  showRuntimeVisualization: 1
-  visualizationSegments: 5
-  coneMaterial: {fileID: 2100000, guid: e055ad05b34901a4e9ac56f1668d168b, type: 2}
-  hitMaterial: {fileID: 2100000, guid: f483901f76b0b384cb4321374169936f, type: 2}
-  centerMaterial: {fileID: 2100000, guid: 72cdd963e6791074b92a81fc7bc04f1f, type: 2}
-  lineWidth: 0.001
-  closestObject: {fileID: 0}
-  closestDistance: 0
 --- !u!4 &1449236886 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4755591037727020581, guid: 7d3229d05242c074a9369511c81961ab, type: 3}
@@ -131120,6 +131121,7 @@ SceneRoots:
   - {fileID: 611968543}
   - {fileID: 1076089352}
   - {fileID: 1394746795}
+  - {fileID: 604571674}
   - {fileID: 1861699309}
   - {fileID: 1491745279}
   - {fileID: 1149998500}
