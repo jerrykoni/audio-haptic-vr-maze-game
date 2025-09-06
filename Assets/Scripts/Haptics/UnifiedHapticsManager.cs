@@ -36,11 +36,22 @@ public class UnifiedHapticsManager : MonoBehaviour
     public float wallHapticsMinCutoff = 0.01f;
 
     [Header("Scanning Haptics Settings")]
+    [Tooltip("Frequency for the stronger, initial pulse on object detection.")]
     public float scanPulseFrequency = 0.5f;
+    [Tooltip("Intensity for the stronger, initial pulse on object detection.")]
     public float scanPulseIntensity = 0.8f;
-    public float scanPulseDuration = 0.1f;
+    [Space(5)]
+    [Tooltip("Frequency for the weaker, subsequent pulses while an object is held in the scanner.")]
     public float scanStayFrequency = 0.2f;
+    [Tooltip("Intensity for the weaker, subsequent pulses while an object is held in the scanner.")]
     public float scanStayIntensity = 0.4f;
+    [Space(5)]
+    [Tooltip("Frequency of the haptic pulse when an object is lost.")]
+    public float unhoverPulseFrequency = 0.3f;
+    [Tooltip("Intensity of the haptic pulse when an object is lost.")]
+    public float unhoverPulseIntensity = 0.5f;
+    // DURATION FIELD REMOVED per request
+
 
     [Header("Proximity-Based Haptics")]
     public float minScanStayPulseInterval = 0.1f;
@@ -64,6 +75,8 @@ public class UnifiedHapticsManager : MonoBehaviour
 
     private readonly Collider[] _nearbyWallsCache = new Collider[16];
 
+    private readonly Dictionary<GameObject, float> _currentTargetDistances = new();
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -82,6 +95,7 @@ public class UnifiedHapticsManager : MonoBehaviour
         {
             leftConeScanner.OnObjectDetected += HandleLeftObjectDetected;
             leftConeScanner.OnObjectLost += HandleLeftObjectLost;
+            leftConeScanner.OnObjectUpdated += UpdateTargetDistance;
         }
         else Debug.LogError("Left ConeScanner is not assigned!", this);
 
@@ -89,6 +103,7 @@ public class UnifiedHapticsManager : MonoBehaviour
         {
             rightConeScanner.OnObjectDetected += HandleRightObjectDetected;
             rightConeScanner.OnObjectLost += HandleRightObjectLost;
+            rightConeScanner.OnObjectUpdated += UpdateTargetDistance;
         }
         else Debug.LogError("Right ConeScanner is not assigned!", this);
 
@@ -101,21 +116,28 @@ public class UnifiedHapticsManager : MonoBehaviour
         {
             leftConeScanner.OnObjectDetected -= HandleLeftObjectDetected;
             leftConeScanner.OnObjectLost -= HandleLeftObjectLost;
+            leftConeScanner.OnObjectUpdated -= UpdateTargetDistance;
         }
         if (rightConeScanner != null)
         {
             rightConeScanner.OnObjectDetected -= HandleRightObjectDetected;
             rightConeScanner.OnObjectLost -= HandleRightObjectLost;
+            rightConeScanner.OnObjectUpdated -= UpdateTargetDistance;
         }
         StopAllCoroutines();
         StopAllVibrations();
     }
 
+    private void UpdateTargetDistance(GameObject target, float distance)
+    {
+        if (target != null)
+        {
+            _currentTargetDistances[target] = distance;
+        }
+    }
+
     private void HandleLeftObjectDetected(GameObject detectedObject)
     {
-        if (!_leftWallHapticsActive)
-            StartCoroutine(VibrationCoroutine(OVRInput.Controller.LTouch, scanPulseFrequency, scanPulseIntensity, scanPulseDuration));
-
         if (!_activeScanCoroutines.ContainsKey(detectedObject))
         {
             var co = StartCoroutine(ScanSequence(detectedObject));
@@ -125,9 +147,6 @@ public class UnifiedHapticsManager : MonoBehaviour
 
     private void HandleRightObjectDetected(GameObject detectedObject)
     {
-        if (!_rightWallHapticsActive)
-            StartCoroutine(VibrationCoroutine(OVRInput.Controller.RTouch, scanPulseFrequency, scanPulseIntensity, scanPulseDuration));
-
         if (!_activeScanCoroutines.ContainsKey(detectedObject))
         {
             var co = StartCoroutine(ScanSequence(detectedObject));
@@ -137,73 +156,95 @@ public class UnifiedHapticsManager : MonoBehaviour
 
     private void HandleLeftObjectLost(GameObject lostObject)
     {
+        _currentTargetDistances.Remove(lostObject);
         bool stillRight = (rightConeScanner != null && rightConeScanner.CurrentTarget == lostObject);
-        if (!stillRight && _activeScanCoroutines.TryGetValue(lostObject, out var co))
+        if (!stillRight)
         {
-            StopCoroutine(co);
-            _activeScanCoroutines.Remove(lostObject);
+            // MODIFIED: Duration is now a hardcoded value (0.05f) for consistency.
+            StartCoroutine(VibrationCoroutine(OVRInput.Controller.LTouch, unhoverPulseFrequency, unhoverPulseIntensity, 0.05f));
+
+            if (_activeScanCoroutines.TryGetValue(lostObject, out var co))
+            {
+                if (co != null)
+                {
+                    StopCoroutine(co);
+                }
+                _activeScanCoroutines.Remove(lostObject);
+            }
         }
     }
 
     private void HandleRightObjectLost(GameObject lostObject)
     {
+        _currentTargetDistances.Remove(lostObject);
         bool stillLeft = (leftConeScanner != null && leftConeScanner.CurrentTarget == lostObject);
-        if (!stillLeft && _activeScanCoroutines.TryGetValue(lostObject, out var co))
+        if (!stillLeft)
         {
-            StopCoroutine(co);
-            _activeScanCoroutines.Remove(lostObject);
+            // MODIFIED: Duration is now a hardcoded value (0.05f) for consistency.
+            StartCoroutine(VibrationCoroutine(OVRInput.Controller.RTouch, unhoverPulseFrequency, unhoverPulseIntensity, 0.05f));
+
+            if (_activeScanCoroutines.TryGetValue(lostObject, out var co))
+            {
+                if (co != null)
+                {
+                    StopCoroutine(co);
+                }
+                _activeScanCoroutines.Remove(lostObject);
+            }
         }
     }
 
     private IEnumerator ScanSequence(GameObject targetObject)
     {
-        yield return new WaitForSeconds(scanPulseDuration);
+        PlayScanPulse(targetObject, scanPulseFrequency, scanPulseIntensity, 0.1f);
+        PlayPooledHoverSound(targetObject);
 
-        while (_activeScanCoroutines.ContainsKey(targetObject))
+        yield return new WaitForFixedUpdate();
+
+        System.Func<bool> isTargetStillActive = () =>
+            (leftConeScanner != null && leftConeScanner.CurrentTarget == targetObject) ||
+            (rightConeScanner != null && rightConeScanner.CurrentTarget == targetObject);
+
+        while (isTargetStillActive())
         {
-            PlayStayPulse(targetObject);
-            PlayPooledHoverSound(targetObject);
+            float fraction = 1.0f;
+            ConeScanner owningScanner = (leftConeScanner != null && leftConeScanner.CurrentTarget == targetObject) ? leftConeScanner : rightConeScanner;
 
-            // Dynamic cone length based interval:
-            // fraction = effectiveLengthNormalized (0 near obstacle -> fast; 1 clear -> slow)
-            float fraction = 1f;
-
-            ConeScanner owningScanner = null;
-            if (leftConeScanner != null && leftConeScanner.CurrentTarget == targetObject)
-                owningScanner = leftConeScanner;
-            else if (rightConeScanner != null && rightConeScanner.CurrentTarget == targetObject)
-                owningScanner = rightConeScanner;
-
-            if (owningScanner != null)
-                fraction = owningScanner.CurrentEffectiveConeLengthNormalized;
-            else
+            if (owningScanner != null && _currentTargetDistances.TryGetValue(targetObject, out float distance))
             {
-                // Target no longer owned; stop
-                break;
+                fraction = Mathf.Clamp01(distance / owningScanner.scanRange);
             }
 
             float currentInterval = Mathf.Lerp(minScanStayPulseInterval, maxScanStayPulseInterval, fraction);
 
             yield return new WaitForSeconds(currentInterval);
+
+            if (isTargetStillActive())
+            {
+                PlayScanPulse(targetObject, scanStayFrequency, scanStayIntensity, 0.05f);
+                PlayPooledHoverSound(targetObject);
+            }
         }
+
+        _activeScanCoroutines.Remove(targetObject);
     }
 
-    private void PlayStayPulse(GameObject targetObject)
+
+    private void PlayScanPulse(GameObject targetObject, float frequency, float intensity, float duration)
     {
         if (leftConeScanner != null && leftConeScanner.CurrentTarget == targetObject)
         {
             if (!_leftWallHapticsActive)
-                StartCoroutine(VibrationCoroutine(OVRInput.Controller.LTouch, scanStayFrequency, scanStayIntensity, 0.05f));
+                StartCoroutine(VibrationCoroutine(OVRInput.Controller.LTouch, frequency, intensity, duration));
         }
 
         if (rightConeScanner != null && rightConeScanner.CurrentTarget == targetObject)
         {
             if (!_rightWallHapticsActive)
-                StartCoroutine(VibrationCoroutine(OVRInput.Controller.RTouch, scanStayFrequency, scanStayIntensity, 0.05f));
+                StartCoroutine(VibrationCoroutine(OVRInput.Controller.RTouch, frequency, intensity, duration));
         }
     }
 
-    // Pooled audio positioned at cone edge
     private void PlayPooledHoverSound(GameObject targetObject)
     {
         if (_hoverAudioSourcePool == null || _hoverAudioSourcePool.Count == 0 || targetObject == null) return;

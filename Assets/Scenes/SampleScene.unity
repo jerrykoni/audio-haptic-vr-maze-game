@@ -35004,9 +35004,10 @@ MonoBehaviour:
   wallHapticsMinCutoff: 0
   scanPulseFrequency: 0.5
   scanPulseIntensity: 0.8
-  scanPulseDuration: 0.02
   scanStayFrequency: 0.2
   scanStayIntensity: 0.6
+  unhoverPulseFrequency: 0.5
+  unhoverPulseIntensity: 0.8
   minScanStayPulseInterval: 0.15
   maxScanStayPulseInterval: 0.74
   maxProximityDistance: 6
@@ -61984,9 +61985,10 @@ MonoBehaviour:
   wallHapticsMinCutoff: 0.01
   scanPulseFrequency: 0.5
   scanPulseIntensity: 0.8
-  scanPulseDuration: 0.02
   scanStayFrequency: 0.2
   scanStayIntensity: 0.6
+  unhoverPulseFrequency: 0.3
+  unhoverPulseIntensity: 0.5
   minScanStayPulseInterval: 0.15
   maxScanStayPulseInterval: 0.74
   maxProximityDistance: 6
