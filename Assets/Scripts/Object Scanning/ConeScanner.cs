@@ -16,6 +16,12 @@ public class ConeScanner : MonoBehaviour
     [Range(3, 64)] public int resolution = 16;
     public LayerMask scannableLayer;
 
+    [Header("Grouping")]
+    [Tooltip("Layers whose colliders should be merged and treated as one logical scannable object (e.g. Walls).")]
+    public LayerMask mergedScannableLayers;
+    [Tooltip("Tag assigned to any merged layer proxy (ensure tag exists in Tag Manager).")]
+    public string mergedLayerProxyTag = "Wall";
+
     [Header("Obstacles")]
     [Tooltip("Which layers should block the scan beam?")]
     public LayerMask obstacleMask;
@@ -86,8 +92,41 @@ public class ConeScanner : MonoBehaviour
     // Effective length (physics cone)
     private float currentConeLength = 0f;
 
-    // NEW: Track obstacle overlaps explicitly (so we can rebuild after re-enable)
+    // Track obstacle overlaps explicitly
     private readonly HashSet<Collider> obstacleOverlapCols = new();
+
+    // Merged layer bookkeeping
+    private readonly Dictionary<int, int> mergedLayerRefCounts = new();
+    private readonly Dictionary<int, HashSet<Collider>> mergedLayerColliderSets = new();
+    private readonly Dictionary<int, GameObject> mergedLayerProxies = new();
+    private readonly Dictionary<int, Vector3> mergedLayerClosestPoints = new();
+
+    // New: track entry order (larger = more recent)
+    private readonly Dictionary<GameObject, ulong> candidateOrder = new();
+    private ulong candidateSequence = 0;
+
+    // Proxy marker
+    public class MergedLayerProxy : MonoBehaviour
+    {
+        public int layerIndex;
+        public ConeScanner owner;
+    }
+
+    // Public accessors for dynamic cone length
+    public float CurrentEffectiveConeLength => currentConeLength;
+    public float CurrentEffectiveConeLengthNormalized => scanRange > 0f ? currentConeLength / scanRange : 0f;
+
+    // Audio positioning helpers
+    public Vector3 ConeApexWorldPosition => (physGO != null) ? physGO.transform.position : (attachPoint != null ? attachPoint.position : transform.position);
+    public Vector3 ConeAxisDirection => (attachPoint == null)
+        ? transform.up
+        : (attachPoint.rotation * axisOffset * Vector3.up).normalized;
+    public Vector3 ConeEdgeWorldPosition => ConeApexWorldPosition + ConeAxisDirection * currentConeLength;
+    public Vector3 GetConePointAtFraction(float t)
+    {
+        t = Mathf.Clamp01(t);
+        return ConeApexWorldPosition + ConeAxisDirection * (currentConeLength * t);
+    }
 
     void Awake()
     {
@@ -108,13 +147,10 @@ public class ConeScanner : MonoBehaviour
         EnsureScrapeAudio();
     }
 
-    // NEW: Re-acquire overlaps when re-enabled (handles being inside objects)
     void OnEnable()
     {
         if (physGO != null && attachPoint != null)
-        {
             ReacquireOverlaps();
-        }
     }
 
 #if UNITY_EDITOR
@@ -134,7 +170,6 @@ public class ConeScanner : MonoBehaviour
         if (visualGO != null)
         {
             visualGO.transform.SetPositionAndRotation(attachPoint.position, baseRotation);
-
             float effRange = GetEffectiveRange();
 
             if (isAttachedToHeadset)
@@ -182,63 +217,158 @@ public class ConeScanner : MonoBehaviour
     }
 
     #region Trigger Handling
-    public void HandleTriggerEnter(Collider other)
+    public void HandleTriggerEnter(Collider other) => ProcessColliderEnter(other);
+    public void HandleTriggerExit(Collider other) => ProcessColliderExit(other);
+    public void HandleTriggerStay(Collider other) { }
+
+    void ProcessColliderEnter(Collider other)
     {
-        if (IsObstacle(other.gameObject))
+        GameObject go = other.gameObject;
+
+        if (IsObstacle(go))
         {
             if (obstacleOverlapCols.Add(other))
                 wallContacts = obstacleOverlapCols.Count;
         }
 
-        if (IsValid(other.gameObject))
-            candidates.Add(other.gameObject);
+        if (!IsValid(go)) return;
+
+        int layer = go.layer;
+        if (IsMergedLayer(layer))
+        {
+            if (!mergedLayerRefCounts.ContainsKey(layer))
+                mergedLayerRefCounts[layer] = 0;
+            mergedLayerRefCounts[layer]++;
+
+            if (!mergedLayerColliderSets.TryGetValue(layer, out var set))
+            {
+                set = new HashSet<Collider>();
+                mergedLayerColliderSets[layer] = set;
+            }
+            set.Add(other);
+
+            if (mergedLayerRefCounts[layer] == 1)
+            {
+                GameObject proxy = GetOrCreateMergedProxy(layer);
+                candidates.Add(proxy);
+                RegisterCandidate(proxy);
+            }
+        }
+        else
+        {
+            if (candidates.Add(go))
+                RegisterCandidate(go);
+        }
     }
 
-    public void HandleTriggerExit(Collider other)
+    void ProcessColliderExit(Collider other)
     {
-        if (IsObstacle(other.gameObject))
+        GameObject go = other.gameObject;
+
+        if (IsObstacle(go))
         {
             if (obstacleOverlapCols.Remove(other))
                 wallContacts = obstacleOverlapCols.Count;
         }
 
-        candidates.Remove(other.gameObject);
-    }
+        if (!IsValid(go)) return;
 
-    public void HandleTriggerStay(Collider other) { }
+        int layer = go.layer;
+        if (IsMergedLayer(layer))
+        {
+            if (mergedLayerRefCounts.TryGetValue(layer, out int count))
+            {
+                count--;
+                if (count <= 0)
+                {
+                    mergedLayerRefCounts[layer] = 0;
+                    if (mergedLayerProxies.TryGetValue(layer, out var proxy))
+                    {
+                        candidates.Remove(proxy);
+                        candidateOrder.Remove(proxy);
+                    }
+                    if (mergedLayerColliderSets.TryGetValue(layer, out var set))
+                        set.Clear();
+                    mergedLayerClosestPoints.Remove(layer);
+                }
+                else
+                {
+                    mergedLayerRefCounts[layer] = count;
+                    if (mergedLayerColliderSets.TryGetValue(layer, out var set))
+                        set.Remove(other);
+                }
+            }
+        }
+        else
+        {
+            if (candidates.Remove(go))
+                candidateOrder.Remove(go);
+        }
+    }
     #endregion
 
-    bool IsValid(GameObject go)
+    void RegisterCandidate(GameObject go)
     {
-        int bit = 1 << go.layer;
-        return (scannableLayer.value & bit) != 0;
+        // Record order only once
+        if (!candidateOrder.ContainsKey(go))
+            candidateOrder[go] = ++candidateSequence;
     }
 
-    bool IsObstacle(GameObject go)
+    bool IsValid(GameObject go) => (scannableLayer.value & (1 << go.layer)) != 0;
+    bool IsObstacle(GameObject go) => (obstacleMask.value & (1 << go.layer)) != 0;
+    bool IsMergedLayer(int layer) => (mergedScannableLayers.value & (1 << layer)) != 0;
+
+    GameObject GetOrCreateMergedProxy(int layer)
     {
-        int bit = 1 << go.layer;
-        return (obstacleMask.value & bit) != 0;
+        if (mergedLayerProxies.TryGetValue(layer, out var existing))
+            return existing;
+
+        var proxy = new GameObject($"MergedLayer_{LayerMaskToName(layer)}");
+        proxy.transform.SetParent(transform, false);
+        if (!string.IsNullOrWhiteSpace(mergedLayerProxyTag))
+        {
+            try { proxy.tag = mergedLayerProxyTag; } catch { }
+        }
+
+        var marker = proxy.AddComponent<MergedLayerProxy>();
+        marker.layerIndex = layer;
+        marker.owner = this;
+        mergedLayerProxies[layer] = proxy;
+        return proxy;
+    }
+
+    string LayerMaskToName(int layer)
+    {
+        string n = LayerMask.LayerToName(layer);
+        return string.IsNullOrEmpty(n) ? layer.ToString() : n;
     }
 
     void UpdateBestTarget()
     {
         GameObject best = null;
-        float bestDistSqr = float.MaxValue;
-        Vector3 apex = physGO.transform.position;
+        ulong bestOrder = 0;
+        float bestDistSqrForTieBreak = float.MaxValue;
+        Vector3 apex = physGO != null ? physGO.transform.position : transform.position;
 
+        // Clean up destroyed
         candidates.RemoveWhere(go => go == null);
 
         foreach (var go in candidates)
         {
-            var col = go.GetComponent<Collider>();
-            if (col == null) continue;
+            if (!candidateOrder.TryGetValue(go, out var order))
+                continue;
 
-            Vector3 pt = col.ClosestPoint(apex);
-            float dSqr = (pt - apex).sqrMagnitude;
-            if (dSqr < bestDistSqr)
+            // If order is better, adopt immediately.
+            // If equal order (extremely rare) tie-break by distance like before.
+            if (order > bestOrder || (order == bestOrder && order != 0))
             {
-                bestDistSqr = dSqr;
-                best = go;
+                float distSqr = GetDistanceSqrToApex(go, apex);
+                if (order > bestOrder || distSqr < bestDistSqrForTieBreak)
+                {
+                    bestOrder = order;
+                    bestDistSqrForTieBreak = distSqr;
+                    best = go;
+                }
             }
         }
 
@@ -246,15 +376,58 @@ public class ConeScanner : MonoBehaviour
         {
             if (currentTarget != null)
                 OnObjectLost?.Invoke(currentTarget);
-
             currentTarget = best;
-
             if (currentTarget != null)
                 OnObjectDetected?.Invoke(currentTarget);
         }
 
+        // Maintain merged proxy positioning for audio alignment
         if (currentTarget != null)
-            OnObjectUpdated?.Invoke(currentTarget, Mathf.Sqrt(bestDistSqr));
+        {
+            var merged = currentTarget.GetComponent<MergedLayerProxy>();
+            if (merged != null && mergedLayerClosestPoints.TryGetValue(merged.layerIndex, out var pos))
+                currentTarget.transform.position = pos;
+        }
+
+        if (currentTarget != null && bestDistSqrForTieBreak < float.MaxValue)
+            OnObjectUpdated?.Invoke(currentTarget, Mathf.Sqrt(bestDistSqrForTieBreak));
+    }
+
+    float GetDistanceSqrToApex(GameObject go, Vector3 apex)
+    {
+        var merged = go.GetComponent<MergedLayerProxy>();
+        if (merged != null)
+        {
+            float dSqr = GetMergedLayerClosestPointDistSqr(merged.layerIndex, apex, out Vector3 cp);
+            if (!float.IsPositiveInfinity(dSqr))
+                mergedLayerClosestPoints[merged.layerIndex] = cp;
+            return dSqr;
+        }
+        var col = go.GetComponent<Collider>();
+        if (col == null) return float.MaxValue;
+        Vector3 pt = col.ClosestPoint(apex);
+        return (pt - apex).sqrMagnitude;
+    }
+
+    float GetMergedLayerClosestPointDistSqr(int layer, Vector3 apex, out Vector3 closestPoint)
+    {
+        closestPoint = apex;
+        if (!mergedLayerColliderSets.TryGetValue(layer, out var set) || set.Count == 0)
+            return float.PositiveInfinity;
+
+        float best = float.MaxValue;
+        foreach (var col in set)
+        {
+            if (col == null) continue;
+            Vector3 pt = col.ClosestPoint(apex);
+            float dSqr = (pt - apex).sqrMagnitude;
+            if (dSqr < best)
+            {
+                best = dSqr;
+                closestPoint = pt;
+            }
+        }
+        return best;
     }
 
     float GetEffectiveRange()
@@ -312,15 +485,24 @@ public class ConeScanner : MonoBehaviour
 
     void OnDisable()
     {
-        // Fire lost if needed
         if (currentTarget != null)
             OnObjectLost?.Invoke(currentTarget);
 
-        // CHANGED: Reset internal sets so we don't carry stale overlaps
         currentTarget = null;
         candidates.Clear();
         obstacleOverlapCols.Clear();
         wallContacts = 0;
+
+        mergedLayerRefCounts.Clear();
+        mergedLayerColliderSets.Clear();
+        mergedLayerClosestPoints.Clear();
+        foreach (var kvp in mergedLayerProxies)
+            if (kvp.Value != null)
+                Destroy(kvp.Value);
+        mergedLayerProxies.Clear();
+
+        candidateOrder.Clear();
+        candidateSequence = 0;
 
         if (scrapeAudio != null && scrapeAudio.isPlaying)
             scrapeAudio.Stop();
@@ -425,23 +607,29 @@ public class ConeScanner : MonoBehaviour
     }
     #endregion
 
-    #region Reacquire Overlaps (NEW)
+    #region Reacquire Overlaps
     void ReacquireOverlaps()
     {
         candidates.Clear();
         obstacleOverlapCols.Clear();
         wallContacts = 0;
         currentTarget = null;
+        mergedLayerRefCounts.Clear();
+        mergedLayerColliderSets.Clear();
+        mergedLayerClosestPoints.Clear();
+        foreach (var kvp in mergedLayerProxies)
+            if (kvp.Value != null)
+                Destroy(kvp.Value);
+        mergedLayerProxies.Clear();
+        candidateOrder.Clear();
+        candidateSequence = 0;
 
         if (physGO == null) return;
 
         Vector3 apex = physGO.transform.position;
         Vector3 axisDir = (attachPoint.rotation * axisOffset * Vector3.up).normalized;
 
-        // Combine masks (scannable + obstacles)
         int mask = scannableLayer.value | obstacleMask.value;
-
-        // Broad phase sphere
         Collider[] hits = Physics.OverlapSphere(apex, scanRange, mask, QueryTriggerInteraction.Collide);
 
         foreach (var col in hits)
@@ -456,19 +644,11 @@ public class ConeScanner : MonoBehaviour
             if (dist > scanRange) continue;
 
             float ang = Vector3.Angle(axisDir, toCenter);
-            if (ang > scanAngle + 0.5f) continue; // small tolerance
+            if (ang > scanAngle + 0.5f) continue;
 
-            if (IsObstacle(go))
-            {
-                if (obstacleOverlapCols.Add(col))
-                    wallContacts = obstacleOverlapCols.Count;
-            }
-
-            if (IsValid(go))
-                candidates.Add(go);
+            ProcessColliderEnter(col);
         }
 
-        // Immediately evaluate best target so events fire right away
         UpdateBestTarget();
     }
     #endregion

@@ -12,6 +12,7 @@ TagManager:
   - Tree
   - MovingObstacle
   - MixedObstacle
+  - Wall
   layers:
   - Default
   - TransparentFX

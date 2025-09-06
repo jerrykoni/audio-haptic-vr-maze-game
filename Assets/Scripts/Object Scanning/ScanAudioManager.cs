@@ -5,8 +5,6 @@ using UnityEngine.Events;
 
 public class ScanAudioManager : MonoBehaviour
 {
-    // A static variable shared by ALL instances of this script.
-    // This tracks the last object whose name was announced, globally.
     private static GameObject _globallyLastAnnouncedObject;
 
     [Header("Audio Settings")]
@@ -16,22 +14,16 @@ public class ScanAudioManager : MonoBehaviour
 
     [Header("Predefined Audio Clips")]
     public AudioClip hoverSound;
-    [Range(0f, 1f)]
-    public float hoverSoundVolume = 1f;
-    [Range(0.1f, 3f)]
-    public float hoverSoundPitch = 1f;
+    [Range(0f, 1f)] public float hoverSoundVolume = 1f;
+    [Range(0.1f, 3f)] public float hoverSoundPitch = 1f;
 
     public AudioClip hoverStaySound;
-    [Range(0f, 1f)]
-    public float hoverStaySoundVolume = 1f;
-    [Range(0.1f, 3f)]
-    public float hoverStaySoundPitch = 1f;
+    [Range(0f, 1f)] public float hoverStaySoundVolume = 1f;
+    [Range(0.1f, 3f)] public float hoverStaySoundPitch = 1f;
 
     public AudioClip unhoverSound;
-    [Range(0f, 1f)]
-    public float unhoverSoundVolume = 1f;
-    [Range(0.1f, 3f)]
-    public float unhoverSoundPitch = 1f;
+    [Range(0f, 1f)] public float unhoverSoundVolume = 1f;
+    [Range(0.1f, 3f)] public float unhoverSoundPitch = 1f;
 
     [Header("Object Audio Mapping")]
     public ObjectAudioMapping[] objectAudioMappings;
@@ -44,7 +36,16 @@ public class ScanAudioManager : MonoBehaviour
     public bool useTTSFallback = true;
     public float ttsVolume = 0.8f;
 
-    // Internal state (local to this instance)
+    [Header("Cone Edge Positioning")]
+    [Tooltip("If true, hover/name/unhover audio will emit from the cone edge (effective tip) instead of object center.")]
+    public bool useConeEdgeForSpatializedEvents = true;
+    [Tooltip("Reference to the ConeScanner on the same controller (assign in inspector).")]
+    public ConeScanner coneScanner;
+
+    // (Optional) Exposed for future adaptive audio (ADDED)
+    public float CurrentConeLength => coneScanner != null ? coneScanner.CurrentEffectiveConeLength : 0f;
+    public float CurrentConeLengthNormalized => coneScanner != null ? coneScanner.CurrentEffectiveConeLengthNormalized : 0f;
+
     private Dictionary<string, AudioClip> audioClipMap;
     private GameObject lastScannedObject;
     private GameObject currentDetectedObject;
@@ -52,11 +53,6 @@ public class ScanAudioManager : MonoBehaviour
     private float lastScanTime;
     private Coroutine currentAudioSequence;
 
-    // --- REMOVED: The two unused variables ---
-    // private bool isPlayingNameAudio;
-    // private bool isObjectCurrentlyDetected;
-
-    // Events for extensibility
     public UnityEvent<string> OnTTSRequested;
     public UnityEvent<GameObject> OnObjectScanned;
     public UnityEvent<GameObject> OnObjectDetectedHaptics;
@@ -72,6 +68,8 @@ public class ScanAudioManager : MonoBehaviour
     void Awake()
     {
         InitializeAudioSystem();
+        if (coneScanner == null)
+            coneScanner = GetComponentInParent<ConeScanner>();
     }
 
     public void OnObjectDetected(GameObject detectedObject)
@@ -80,13 +78,12 @@ public class ScanAudioManager : MonoBehaviour
         if (Time.time - lastScanTime < minTimeBetweenScans) return;
 
         string objectTag = detectedObject.tag;
+        if (string.IsNullOrEmpty(objectTag) || objectTag == "Untagged")
+            objectTag = detectedObject.name;
 
         bool shouldAnnounceName = (detectedObject != _globallyLastAnnouncedObject);
 
         currentDetectedObject = detectedObject;
-
-        // --- REMOVED: Assignment to isObjectCurrentlyDetected ---
-        // isObjectCurrentlyDetected = true;
 
         PlayHoverSound(detectedObject);
 
@@ -108,47 +105,34 @@ public class ScanAudioManager : MonoBehaviour
     {
         if (lostObject == currentDetectedObject)
         {
-            // --- REMOVED: Assignment to isObjectCurrentlyDetected ---
-            // isObjectCurrentlyDetected = false;
             currentDetectedObject = null;
 
             if (hoverStayAudioSource != null && hoverStayAudioSource.isPlaying)
-            {
                 hoverStayAudioSource.Stop();
-            }
 
             PlayUnhoverSound(lostObject);
             OnObjectLostHaptics.Invoke(lostObject);
         }
     }
 
-    #region Unchanged Methods
+    #region Core
     void InitializeAudioSystem()
     {
         audioClipMap = new Dictionary<string, AudioClip>();
         foreach (var mapping in objectAudioMappings)
         {
             if (!string.IsNullOrEmpty(mapping.objectTag) && mapping.audioClip != null)
-            {
                 audioClipMap[mapping.objectTag] = mapping.audioClip;
-            }
         }
 
         if (nameAudioSource == null)
-        {
             nameAudioSource = gameObject.AddComponent<AudioSource>();
-        }
         if (hoverAudioSource == null)
         {
             GameObject uiAudioObject = new GameObject("UI Audio Source");
             uiAudioObject.transform.SetParent(transform);
             hoverAudioSource = uiAudioObject.AddComponent<AudioSource>();
         }
-        if (hoverStayAudioSource == null)
-        {
-            Debug.LogWarning("Hover Stay Audio Source is not assigned.");
-        }
-
         if (hoverStayAudioSource != null)
         {
             hoverStayAudioSource.loop = false;
@@ -168,12 +152,17 @@ public class ScanAudioManager : MonoBehaviour
         if (OnObjectLostHaptics == null) OnObjectLostHaptics = new UnityEvent<GameObject>();
     }
 
+    Vector3 GetEmitPosition(GameObject obj)
+    {
+        if (!useConeEdgeForSpatializedEvents || coneScanner == null)
+            return obj.transform.position;
+        return coneScanner.ConeEdgeWorldPosition;
+    }
+
     void HandleNewObjectDetected(GameObject obj, string tag)
     {
         if (currentAudioSequence != null)
-        {
             StopCoroutine(currentAudioSequence);
-        }
         currentAudioSequence = StartCoroutine(PlayNewObjectAudioSequence(obj, tag));
     }
 
@@ -181,7 +170,7 @@ public class ScanAudioManager : MonoBehaviour
     {
         if (hoverSound != null)
         {
-            hoverAudioSource.transform.position = obj.transform.position;
+            hoverAudioSource.transform.position = GetEmitPosition(obj);
             hoverAudioSource.volume = hoverSoundVolume;
             hoverAudioSource.pitch = hoverSoundPitch;
             hoverAudioSource.PlayOneShot(hoverSound);
@@ -192,7 +181,7 @@ public class ScanAudioManager : MonoBehaviour
     {
         if (unhoverSound != null)
         {
-            hoverAudioSource.transform.position = obj.transform.position;
+            hoverAudioSource.transform.position = GetEmitPosition(obj);
             hoverAudioSource.volume = unhoverSoundVolume;
             hoverAudioSource.pitch = unhoverSoundPitch;
             hoverAudioSource.PlayOneShot(unhoverSound);
@@ -208,9 +197,7 @@ public class ScanAudioManager : MonoBehaviour
 
     IEnumerator PlayObjectNameAudio(GameObject obj, string tag)
     {
-        // --- REMOVED: Assignment to isPlayingNameAudio ---
-        // isPlayingNameAudio = true;
-        nameAudioSource.transform.position = obj.transform.position;
+        nameAudioSource.transform.position = GetEmitPosition(obj);
 
         if (audioClipMap.ContainsKey(tag) && audioClipMap[tag] != null)
         {
@@ -226,27 +213,47 @@ public class ScanAudioManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"No audio clip found for tag: {tag} and TTS is disabled");
+            Debug.LogWarning($"No audio clip for tag/name: {tag} and TTS disabled");
         }
-        // --- REMOVED: Assignment to isPlayingNameAudio ---
-        // isPlayingNameAudio = false;
     }
 
     void OnDestroy()
     {
         if (currentAudioSequence != null)
-        {
             StopCoroutine(currentAudioSequence);
-        }
     }
 
-    // --- MODIFIED: Methods kept as hooks for external systems, but internal logic removed ---
-    public void OnTTSPlaybackComplete() { /* isPlayingNameAudio = false; */ }
-    public void OnTTSPlaybackStarted() { /* isPlayingNameAudio = true; */ }
+    public void OnTTSPlaybackComplete() { }
+    public void OnTTSPlaybackStarted() { }
 
-    public void UpdateAudioMapping(string tag, AudioClip clip) { if (audioClipMap == null) InitializeAudioSystem(); audioClipMap[tag] = clip; }
-    public void RemoveAudioMapping(string tag) { if (audioClipMap != null && audioClipMap.ContainsKey(tag)) audioClipMap.Remove(tag); }
-    public string[] GetAvailableAudioTags() { if (audioClipMap == null) return new string[0]; string[] tags = new string[audioClipMap.Keys.Count]; audioClipMap.Keys.CopyTo(tags, 0); return tags; }
-    public void TestAudioClip(string tag) { if (audioClipMap.ContainsKey(tag) && audioClipMap[tag] != null) { nameAudioSource.transform.position = transform.position; nameAudioSource.PlayOneShot(audioClipMap[tag]); } else { Debug.LogWarning($"No audio clip found for tag: {tag}"); } }
+    public void UpdateAudioMapping(string tag, AudioClip clip)
+    {
+        if (audioClipMap == null) InitializeAudioSystem();
+        audioClipMap[tag] = clip;
+    }
+    public void RemoveAudioMapping(string tag)
+    {
+        if (audioClipMap != null && audioClipMap.ContainsKey(tag))
+            audioClipMap.Remove(tag);
+    }
+    public string[] GetAvailableAudioTags()
+    {
+        if (audioClipMap == null) return new string[0];
+        string[] tags = new string[audioClipMap.Keys.Count];
+        audioClipMap.Keys.CopyTo(tags, 0);
+        return tags;
+    }
+    public void TestAudioClip(string tag)
+    {
+        if (audioClipMap.ContainsKey(tag) && audioClipMap[tag] != null)
+        {
+            nameAudioSource.transform.position = transform.position;
+            nameAudioSource.PlayOneShot(audioClipMap[tag]);
+        }
+        else
+        {
+            Debug.LogWarning($"No audio clip found for tag: {tag}");
+        }
+    }
     #endregion
 }
