@@ -10292,11 +10292,11 @@ MonoBehaviour:
   attachPoint: {fileID: 1939473583}
   headsetTransform: {fileID: 2139036001}
   scanAngle: 5
-  scanRange: 6
+  scanRange: 5
   resolution: 16
   scannableLayer:
     serializedVersion: 2
-    m_Bits: 384
+    m_Bits: 256
   mergedScannableLayers:
     serializedVersion: 2
     m_Bits: 128
@@ -34990,14 +34990,14 @@ MonoBehaviour:
   rightConeScanner: {fileID: 859010868}
   leftAudioManager: {fileID: 1491745277}
   rightAudioManager: {fileID: 1861699308}
-  detectionRadius: 0.15
-  maxHapticDistance: 0.15
+  detectionRadius: 0.5
+  maxHapticDistance: 0.5
   hapticCheckInterval: 0.1
   wallHapticFrequency: 0.1
   wallLayer:
     serializedVersion: 2
     m_Bits: 128
-  wallMaxIntensity: 0.65
+  wallMaxIntensity: 0.7
   wallIntensityRampExponent: 3
   wallHapticRiseTime: 0.3
   wallHapticFallTime: 0.3
@@ -35009,7 +35009,7 @@ MonoBehaviour:
   unhoverPulseFrequency: 0.5
   unhoverPulseIntensity: 0.8
   minScanStayPulseInterval: 0.15
-  maxScanStayPulseInterval: 0.74
+  maxScanStayPulseInterval: 0.8
   maxProximityDistance: 6
   audioSourcePoolSize: 8
 --- !u!4 &611968543
@@ -38855,15 +38855,15 @@ MonoBehaviour:
   attachPoint: {fileID: 1266988950}
   headsetTransform: {fileID: 2139036001}
   scanAngle: 5
-  scanRange: 3
+  scanRange: 5
   resolution: 16
   scannableLayer:
     serializedVersion: 2
-    m_Bits: 384
+    m_Bits: 256
   mergedScannableLayers:
     serializedVersion: 2
-    m_Bits: 128
-  mergedLayerProxyTag: Wall
+    m_Bits: 0
+  mergedLayerProxyTag: 
   obstacleMask:
     serializedVersion: 2
     m_Bits: 384
@@ -51873,6 +51873,18 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1863197348}
         m_TargetAssemblyTypeName: UnityEngine.AudioSource, UnityEngine
+        m_MethodName: Stop
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 1460964375}
+        m_TargetAssemblyTypeName: UnityEngine.AudioSource, UnityEngine
         m_MethodName: Play
         m_Mode: 1
         m_Arguments:
@@ -51893,26 +51905,14 @@ MonoBehaviour:
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
-      - m_Target: {fileID: 1460964375}
-        m_TargetAssemblyTypeName: UnityEngine.AudioSource, UnityEngine
-        m_MethodName: Stop
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
+          m_BoolArgument: 0
         m_CallState: 2
   onToggleOff:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1460964375}
         m_TargetAssemblyTypeName: UnityEngine.AudioSource, UnityEngine
-        m_MethodName: Play
+        m_MethodName: Stop
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -51921,6 +51921,18 @@ MonoBehaviour:
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 1863197348}
+        m_TargetAssemblyTypeName: UnityEngine.AudioSource, UnityEngine
+        m_MethodName: Play
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 292834151}
         m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
@@ -51932,19 +51944,7 @@ MonoBehaviour:
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1863197348}
-        m_TargetAssemblyTypeName: UnityEngine.AudioSource, UnityEngine
-        m_MethodName: Stop
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
+          m_BoolArgument: 1
         m_CallState: 2
 --- !u!4 &1054614242
 Transform:
