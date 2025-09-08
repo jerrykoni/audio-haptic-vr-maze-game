@@ -2,8 +2,8 @@ using UnityEngine;
 using UnityEngine.Events;
 
 /// <summary>
-/// Triggers a UnityEvent when the headset is rotated to a specific direction for a certain duration.
-/// Can be configured to trigger only once or multiple times.
+/// Triggers a UnityEvent when the headset is aimed at a specific Transform on the horizontal (XZ) plane.
+/// Ignores the Y-axis (height) for triggering.
 /// </summary>
 public class HeadsetRotationTrigger : MonoBehaviour
 {
@@ -11,16 +11,16 @@ public class HeadsetRotationTrigger : MonoBehaviour
     [Tooltip("A reference to the OVRCameraRig's centerEyeAnchor transform.")]
     public Transform centerEyeAnchor;
 
-    [Header("Target Direction")]
-    [Tooltip("The direction the user needs to look at to trigger the event.")]
-    public Vector3 targetDirection = Vector3.forward;
+    [Tooltip("The Transform the user needs to look at to trigger the event.")]
+    public Transform targetTransform;
 
-    [Tooltip("The angle of tolerance in degrees. The smaller the value, the more precise the user has to be.")]
+    [Header("Targeting Settings")]
+    [Tooltip("The angle of tolerance in degrees on the horizontal plane. The smaller the value, the more precise the user has to be.")]
     [Range(1f, 90f)]
     public float angleThreshold = 10f;
 
     [Header("Dwell Time")]
-    [Tooltip("The time in seconds the user needs to stay looking at the target direction to trigger the event.")]
+    [Tooltip("The time in seconds the user needs to stay looking at the target to trigger the event.")]
     public float dwellTime = 1.5f;
 
     [Header("Trigger Settings")]
@@ -28,7 +28,7 @@ public class HeadsetRotationTrigger : MonoBehaviour
     public bool triggerOnlyOnce = true;
 
     [Header("Event")]
-    [Tooltip("The event that will be triggered when the user looks at the target direction for the specified dwell time.")]
+    [Tooltip("The event that will be triggered when the user looks at the target for the specified dwell time.")]
     public UnityEvent OnLookAtTarget;
 
     private bool isLookingAtTarget = false;
@@ -43,20 +43,35 @@ public class HeadsetRotationTrigger : MonoBehaviour
             return;
         }
 
+        // Check for missing references
         if (centerEyeAnchor == null)
         {
             Debug.LogError("Center Eye Anchor is not assigned in the HeadsetRotationTrigger script.");
             return;
         }
+        if (targetTransform == null)
+        {
+            Debug.LogError("Target Transform is not assigned in the HeadsetRotationTrigger script.");
+            return;
+        }
 
-        // Normalize the target direction to ensure its length is 1
-        Vector3 normalizedTargetDirection = targetDirection.normalized;
+        // --- MODIFIED CALCULATION FOR XZ PLANE ---
 
-        // Get the forward direction of the headset
-        Vector3 headsetForwardDirection = centerEyeAnchor.forward;
+        // Get the headset's forward direction and project it onto the XZ plane by setting y to 0.
+        Vector3 headsetForwardXZ = centerEyeAnchor.forward;
+        headsetForwardXZ.y = 0;
 
-        // Calculate the angle between the headset's forward direction and the target direction
-        float angle = Vector3.Angle(headsetForwardDirection, normalizedTargetDirection);
+        // Calculate the direction from the headset to the target and project it onto the XZ plane.
+        Vector3 directionToTarget = targetTransform.position - centerEyeAnchor.position;
+        directionToTarget.y = 0;
+
+        // --- END OF MODIFICATION ---
+
+
+        // Calculate the angle between the two flattened vectors.
+        // If either vector has a magnitude of zero (e.g., looking straight up/down), the angle is 0.
+        float angle = Vector3.Angle(headsetForwardXZ.normalized, directionToTarget.normalized);
+
 
         // Check if the angle is within the defined threshold
         if (angle <= angleThreshold)
@@ -99,14 +114,21 @@ public class HeadsetRotationTrigger : MonoBehaviour
     }
 
     /// <summary>
-    /// Draws a gizmo in the editor to visualize the target direction.
+    /// Draws a gizmo in the editor to visualize the connection to the target.
     /// </summary>
     void OnDrawGizmosSelected()
     {
-        if (centerEyeAnchor != null)
+        if (centerEyeAnchor != null && targetTransform != null)
         {
-            Gizmos.color = Color.red;
-            Gizmos.DrawRay(centerEyeAnchor.position, targetDirection.normalized * 2);
+            // Draw a line to the target's actual position
+            Gizmos.color = Color.grey;
+            Gizmos.DrawLine(centerEyeAnchor.position, targetTransform.position);
+
+            // Draw a brighter line on the XZ plane to visualize the ignored height
+            Vector3 centerEyeXZ = new Vector3(centerEyeAnchor.position.x, 0, centerEyeAnchor.position.z);
+            Vector3 targetXZ = new Vector3(targetTransform.position.x, 0, targetTransform.position.z);
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(centerEyeXZ, targetXZ);
         }
     }
 }

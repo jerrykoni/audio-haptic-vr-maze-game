@@ -13,6 +13,9 @@ TagManager:
   - MovingObstacle
   - MixedObstacle
   - Wall
+  - CloseObstacle
+  - FarObstacle
+  - MidObstacle
   layers:
   - Default
   - TransparentFX
