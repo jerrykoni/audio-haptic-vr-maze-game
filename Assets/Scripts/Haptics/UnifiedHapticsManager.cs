@@ -73,6 +73,10 @@ public class UnifiedHapticsManager : MonoBehaviour
     private float _leftWallIntensity = 0f;
     private float _rightWallIntensity = 0f;
 
+    // --- START: ADDED CODE ---
+    private bool _wallHapticsEnabled = true;
+    // --- END: ADDED CODE ---
+
     private readonly Collider[] _nearbyWallsCache = new Collider[16];
 
     private readonly Dictionary<GameObject, float> _currentTargetDistances = new();
@@ -261,6 +265,24 @@ public class UnifiedHapticsManager : MonoBehaviour
         _poolIndex = (_poolIndex + 1) % _hoverAudioSourcePool.Count;
     }
 
+    // --- START: ADDED CODE ---
+    /// <summary>
+    /// Deactivates the wall haptic feedback loop.
+    /// </summary>
+    public void DeactivateWallHaptics()
+    {
+        _wallHapticsEnabled = false;
+    }
+
+    /// <summary>
+    /// Reactivates the wall haptic feedback loop.
+    /// </summary>
+    public void ReactivateWallHaptics()
+    {
+        _wallHapticsEnabled = true;
+    }
+    // --- END: ADDED CODE ---
+
     #region Helper Methods
     void InitializeAudioPool()
     {
@@ -311,16 +333,45 @@ public class UnifiedHapticsManager : MonoBehaviour
         OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.RTouch);
     }
 
+    // --- START: MODIFIED CODE ---
     IEnumerator WallHapticFeedbackLoop()
     {
         WaitForSeconds wait = new(hapticCheckInterval);
         while (true)
         {
-            _leftWallHapticsActive = ProcessHandHaptics(leftHandAnchor, OVRInput.Controller.LTouch, ref _leftWallIntensity);
-            _rightWallHapticsActive = ProcessHandHaptics(rightHandAnchor, OVRInput.Controller.RTouch, ref _rightWallIntensity);
+            if (_wallHapticsEnabled)
+            {
+                _leftWallHapticsActive = ProcessHandHaptics(leftHandAnchor, OVRInput.Controller.LTouch, ref _leftWallIntensity);
+                _rightWallHapticsActive = ProcessHandHaptics(rightHandAnchor, OVRInput.Controller.RTouch, ref _rightWallIntensity);
+            }
+            else
+            {
+                // If haptics are disabled, ensure any lingering wall vibrations are turned off.
+                if (_leftWallHapticsActive)
+                {
+                    _leftWallIntensity = 0f;
+                    _leftWallHapticsActive = false;
+                    bool isLeftHandScanning = leftConeScanner != null && leftConeScanner.CurrentTarget != null;
+                    if (!isLeftHandScanning)
+                    {
+                        OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.LTouch);
+                    }
+                }
+                if (_rightWallHapticsActive)
+                {
+                    _rightWallIntensity = 0f;
+                    _rightWallHapticsActive = false;
+                    bool isRightHandScanning = rightConeScanner != null && rightConeScanner.CurrentTarget != null;
+                    if (!isRightHandScanning)
+                    {
+                        OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.RTouch);
+                    }
+                }
+            }
             yield return wait;
         }
     }
+    // --- END: MODIFIED CODE ---
 
     bool ProcessHandHaptics(Transform handAnchor, OVRInput.Controller controller, ref float currentSmoothedIntensity)
     {
