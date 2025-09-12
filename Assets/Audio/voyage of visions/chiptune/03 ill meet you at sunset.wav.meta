@@ -1,0 +1,30 @@
+fileFormatVersion: 2
+guid: 7c52e102d05949942832bf3c792c3bf5
+AssetOrigin:
+  serializedVersion: 1
+  productId: 303570
+  packageName: voyage of visions
+  packageVersion: 1.0
+  assetPath: Assets/voyage of visions/chiptune/03 ill meet you at sunset.wav
+  uploadId: 711840
+AudioImporter:
+  externalObjects: {}
+  serializedVersion: 8
+  defaultSettings:
+    serializedVersion: 2
+    loadType: 2
+    sampleRateSetting: 0
+    sampleRateOverride: 44100
+    compressionFormat: 1
+    quality: 1
+    conversionMode: 0
+    preloadAudioData: 1
+  platformSettingOverrides: {}
+  forceToMono: 1
+  normalize: 0
+  loadInBackground: 1
+  ambisonic: 0
+  3D: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
