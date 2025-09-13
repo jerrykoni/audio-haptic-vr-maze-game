@@ -162773,15 +162773,15 @@ MonoBehaviour:
   unhoverSoundPitch: 1
   objectAudioMappings:
   - objectTag: Obstacle
-    audioClip: {fileID: 8300000, guid: 6b5e666c4b670a14aa285329336d02f8, type: 3}
+    audioClip: {fileID: 8300000, guid: 75aada9bae1178345b62f0ded95390d7, type: 3}
   - objectTag: UpwardObstacle
-    audioClip: {fileID: 8300000, guid: f4676217703b9fc4a8bbe243b66520ba, type: 3}
+    audioClip: {fileID: 8300000, guid: fcd14c1aeca438648a793baaf91b23b7, type: 3}
+  - objectTag: MovingObstacle
+    audioClip: {fileID: 8300000, guid: 1cd36088443c40542bc1c9509e9cb394, type: 3}
   - objectTag: MixedObstacle
     audioClip: {fileID: 8300000, guid: eb58dd9eccb740c42be8882fb078028d, type: 3}
-  - objectTag: MovingObstacle
-    audioClip: {fileID: 8300000, guid: 40632441c70d7bd49afbbbe7c63d7e11, type: 3}
   - objectTag: Tree
-    audioClip: {fileID: 8300000, guid: eb58dd9eccb740c42be8882fb078028d, type: 3}
+    audioClip: {fileID: 8300000, guid: ab5d0f70a4344e343ba71815fc8056a1, type: 3}
   - objectTag: Wall
     audioClip: {fileID: 8300000, guid: 3af618d56be83fe44a088e3fcec11e0f, type: 3}
   - objectTag: CloseObstacle
