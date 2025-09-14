@@ -16,6 +16,8 @@ TagManager:
   - CloseObstacle
   - FarObstacle
   - MidObstacle
+  - Bench
+  - Lamp
   layers:
   - Default
   - TransparentFX
