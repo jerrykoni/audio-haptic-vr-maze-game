@@ -15878,8 +15878,8 @@ MonoBehaviour:
   staticNearSource: {fileID: 738731971}
   staticFarSource: {fileID: 2087548563}
   nearStaticThreshold: 0.8
-  maxStaticNearVolume: 0.15
-  maxStaticFarVolume: 0.3
+  maxStaticNearVolume: 1
+  maxStaticFarVolume: 0.5
   audioGroups:
   - mainAudioSource: {fileID: 704322552}
     anchorPoints:
@@ -32186,7 +32186,7 @@ MonoBehaviour:
   centerEyeAnchor: {fileID: 2139036001}
   targetTransform: {fileID: 82846824}
   angleThreshold: 10
-  dwellTime: 0.5
+  dwellTime: 0.8
   triggerOnlyOnce: 1
   OnLookAtTarget:
     m_PersistentCalls:
@@ -37845,8 +37845,8 @@ MonoBehaviour:
   staticNearSource: {fileID: 738731971}
   staticFarSource: {fileID: 2087548563}
   nearStaticThreshold: 0.8
-  maxStaticNearVolume: 0.15
-  maxStaticFarVolume: 0.3
+  maxStaticNearVolume: 1
+  maxStaticFarVolume: 0.5
   audioGroups:
   - mainAudioSource: {fileID: 704322552}
     anchorPoints:
@@ -49913,8 +49913,8 @@ MonoBehaviour:
   wallLayer:
     serializedVersion: 2
     m_Bits: 128
-  wallMaxIntensity: 0.7
-  wallIntensityRampExponent: 3
+  wallMaxIntensity: 0.8
+  wallIntensityRampExponent: 1
   wallHapticRiseTime: 0.3
   wallHapticFallTime: 0.3
   wallHapticsMinCutoff: 0
@@ -56745,8 +56745,8 @@ MonoBehaviour:
   staticNearSource: {fileID: 738731971}
   staticFarSource: {fileID: 2087548563}
   nearStaticThreshold: 0.8
-  maxStaticNearVolume: 0.15
-  maxStaticFarVolume: 0.3
+  maxStaticNearVolume: 1
+  maxStaticFarVolume: 0.5
   audioGroups:
   - mainAudioSource: {fileID: 704322552}
     anchorPoints:
@@ -62930,12 +62930,12 @@ AudioSource:
   m_GameObject: {fileID: 738731970}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: b5b5e9aeb97eb504c8f825951979cdf4, type: 3}
-  m_Resource: {fileID: 8300000, guid: b5b5e9aeb97eb504c8f825951979cdf4, type: 3}
+  OutputAudioMixerGroup: {fileID: 1475031202415677679, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
+  m_audioClip: {fileID: 8300000, guid: 6632a0f066359584b9eabf8772a3a00c, type: 3}
+  m_Resource: {fileID: 8300000, guid: 6632a0f066359584b9eabf8772a3a00c, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
-  m_Pitch: 0.53
+  m_Pitch: 1
   Loop: 1
   Mute: 0
   Spatialize: 0
@@ -76758,7 +76758,7 @@ MonoBehaviour:
   staticNearSource: {fileID: 738731971}
   staticFarSource: {fileID: 2087548563}
   nearStaticThreshold: 0.8
-  maxStaticNearVolume: 0.6
+  maxStaticNearVolume: 1
   maxStaticFarVolume: 0.5
   audioGroups:
   - mainAudioSource: {fileID: 704322552}
@@ -119937,7 +119937,7 @@ MonoBehaviour:
   centerEyeAnchor: {fileID: 2139036001}
   targetTransform: {fileID: 1889549366}
   angleThreshold: 10
-  dwellTime: 0.5
+  dwellTime: 0.8
   triggerOnlyOnce: 1
   OnLookAtTarget:
     m_PersistentCalls:
@@ -149384,7 +149384,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enableSpatialization: 1
-  gainBoostDb: 12
+  gainBoostDb: 20
   enableAcoustics: 0
   reverbSendDb: 0
 --- !u!82 &1654261527
@@ -149409,7 +149409,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 9
+  MaxDistance: 5
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0
@@ -169793,7 +169793,7 @@ AudioSource:
   m_GameObject: {fileID: 1899201012}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 1144506126212865047, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
+  OutputAudioMixerGroup: {fileID: 9064460506412183893, guid: 94f04eda0168d154f80c86848cf38f75, type: 2}
   m_audioClip: {fileID: 8300000, guid: d9d17d7590ef4f54493eeaf9ebc33a3e, type: 3}
   m_Resource: {fileID: 8300000, guid: d9d17d7590ef4f54493eeaf9ebc33a3e, type: 3}
   m_PlayOnAwake: 0
