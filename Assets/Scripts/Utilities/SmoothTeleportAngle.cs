@@ -5,7 +5,7 @@ using UnityEngine;
 /// (CenterEyeAnchor) arrives precisely at the target destination.
 /// It accounts for the player's physical offset within their play space.
 /// </summary>
-public class SmoothTeleport : MonoBehaviour
+public class SmoothTeleportAngle : MonoBehaviour
 {
     [Header("Core Components")]
     [Tooltip("The OVRCameraRig you want to move.")]
@@ -53,14 +53,10 @@ public class SmoothTeleport : MonoBehaviour
             targetRigPosition.z
         );
 
-        // Optional: If you also want the player to face the target's forward direction.
-        // Uncomment the following lines.
-        /*
         float headRotationY = centerEye.rotation.eulerAngles.y;
         float targetRotationY = target.rotation.eulerAngles.y;
         float rotationDifferenceY = targetRotationY - headRotationY;
         cameraRig.transform.Rotate(0, rotationDifferenceY, 0);
-        */
 
         Debug.Log("Player teleported accurately to " + target.name);
     }
