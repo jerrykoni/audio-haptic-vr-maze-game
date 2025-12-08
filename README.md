@@ -1,7 +1,7 @@
 # Audio-Haptic VR Navigation for Non-Visual Environments
 ### 🎓 Master's Thesis | National and Kapodistrian University of Athens
 
-[![Thesis Database](https://img.shields.io/badge/Read_Full_Thesis-University_Repository-blue?style=for-the-badge&logo=googlescholar)](https://pergamos.lib.uoa.gr/item/uoadl:5311945)
+[![Thesis Database](https://img.shields.io/badge/official publication-University_Repository-blue?style=for-the-badge&logo=googlescholar)](https://pergamos.lib.uoa.gr/item/uoadl:5311945)
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
 ## 📖 Project Overview
 This project is a **VR accessibility research tool** developed for **Meta Quest 2/3**. It investigates how blind and low-vision users can navigate complex 3D environments without visual cues.
@@ -40,12 +40,12 @@ To validate the effectiveness of the audio-haptic systems, a user study was cond
 *   **Engine:** Unity 6
 *   **Language:** C#
 *   **Hardware:** Meta Quest 2 / Quest 3
-*   **SDKs:** Meta XR All-in-One SDK (Interaction, Audio, Haptics)
+*   **SDKs:** Meta XR All-in-One SDK (Interaction, Spatial Audio, Haptics)
 
 ## 📄 Thesis Details
 **Title:** Design and Development of an Audio and Haptic Approach for Non-Visual Navigation in 3D Virtual Environments
 **Institution:** National and Kapodistrian University of Athens (MSc in ICT)
-**Link:** [Click here to view the official publication](INSERT_LINK_TO_THESIS_DATABASE_HERE)
+**Link:** [Click here to view the official publication](https://pergamos.lib.uoa.gr/item/uoadl:5311945)
 
 ## ⚖️ License
 This work is licensed under a [Creative Commons Attribution-NonCommercial 4.0 International License](http://creativecommons.org/licenses/by-nc/4.0/).
