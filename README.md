@@ -1,7 +1,7 @@
 # Audio-Haptic VR Navigation for Non-Visual Environments
 ### 🎓 Master's Thesis | National and Kapodistrian University of Athens
 
-[![Thesis Database](https://img.shields.io/badge/official publication-University_Repository-blue?style=for-the-badge&logo=googlescholar)](https://pergamos.lib.uoa.gr/item/uoadl:5311945)
+[![Thesis Database](https://img.shields.io/badge/official_publication-University_Repository-blue?style=for-the-badge&logo=googlescholar)](https://pergamos.lib.uoa.gr/item/uoadl:5311945)
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
 ## 📖 Project Overview
 This project is a **VR accessibility research tool** developed for **Meta Quest 2/3**. It investigates how blind and low-vision users can navigate complex 3D environments without visual cues.
