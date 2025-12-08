@@ -44,7 +44,9 @@ To validate the effectiveness of the audio-haptic systems, a user study was cond
 
 ## 📄 Thesis Details
 **Title:** Design and Development of an Audio and Haptic Approach for Non-Visual Navigation in 3D Virtual Environments
+
 **Institution:** National and Kapodistrian University of Athens (MSc in ICT)
+
 **Link:** [Click here to view the official publication](https://pergamos.lib.uoa.gr/item/uoadl:5311945)
 
 ## ⚖️ License
