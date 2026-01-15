@@ -36,8 +36,8 @@ A custom physics-based scanning system that detects objects in a virtual space.
     *   *Audio:* Object names or properties are dictated on detection; hover sounds scale with distance.
     *   *Haptics:* Sharp impulse on detection, followed by soft pulses (continuous feedback) while hovering, synced with hover sounds.
 
-### 3. Proximity-Based Haptic Walls
-A continuous haptic feedback loop using the **Meta XR Haptics SDK**.
+### 3. Proximity-Based Haptic-Audio Walls
+A continuous haptic feedback loop with supporting audio cues.
 *   **Function:**
     *   *Haptics:* Vibration intensity increases smoothly in the respective controller as the user gets closer to walls.
     *   *Audio:* Velocity-based scraping sounds are emitted when the player is "touching" a wall while moving their hand.
